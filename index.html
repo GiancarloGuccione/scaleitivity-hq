@@ -226,6 +226,15 @@ body.shake #app{animation:shakeA .5s both}
 .slot.mine{border-style:solid;border-color:var(--gold);box-shadow:0 0 10px rgba(255,211,77,.25)}
 .slot .dot{width:10px;height:10px;background:var(--dim);flex:0 0 auto}
 .pong-status{font-family:'Press Start 2P';font-size:7px;color:var(--dim);line-height:2;margin-top:12px}
+/* perf: kill expensive layers while a match is running */
+body.gaming::after{display:none}
+body.gaming #bgfx{display:none}
+body.gaming .logo{animation:none}
+/* lead intel links */
+.clink{color:var(--p2);text-decoration:none;font-weight:700;border-bottom:1px dotted var(--p2)}
+.intel-row{margin-top:9px;font-size:12.5px;color:var(--dim);line-height:2}
+.intel-row b{color:var(--txt);font-weight:800}
+.miss{color:var(--lose);font-weight:700}
 </style>
 </head>
 <body>
@@ -376,6 +385,7 @@ function checkLevelUp(){
 }
 
 function auditCount(l){let n=0;const a=l.audit;if(a.a1hrs!==''&&a.a1hrs!=null)n++;if(a.a2text)n++;if(a.a3hrs!==''&&a.a3hrs!=null)n++;if(a.a4count!==''&&a.a4count!=null)n++;if(a.a5days!==''&&a.a5days!=null)n++;return n;}
+function igUrl(v){v=(v||'').trim();return /^https?:\/\//i.test(v)?v:'https://instagram.com/'+v.replace(/^@/,'');}
 function esc(s){return (s||'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function levelOf(p){let L=LEVELS[0];for(const lv of LEVELS){if(p>=lv[0])L=lv;}return L;}
 function nextLevel(p){for(const lv of LEVELS){if(p<lv[0])return lv;}return null;}
@@ -400,11 +410,37 @@ function score(){
   });
   return s;
 }
+/* ============ MARKET INTEL (secret-shop aggregates = pitch + marketing ammo) ============ */
+function intelStats(){
+  const A=leads.filter(l=>auditCount(l)>0);
+  const nums=k=>A.map(l=>parseFloat(l.audit[k])).filter(v=>!isNaN(v));
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const dm=nums('a1hrs'),form=nums('a3hrs'),rev=nums('a4count'),stars=nums('a4stars'),ig=nums('a5days');
+  const t2=A.filter(l=>l.audit.a2text==='N'||l.audit.a2text==='Y');
+  return {
+    n:A.length,
+    dmAvg:avg(dm),dmSlow:dm.length?Math.round(100*dm.filter(v=>v>=24).length/dm.length):null,
+    noText:t2.length?Math.round(100*t2.filter(l=>l.audit.a2text==='N').length/t2.length):null,
+    formAvg:avg(form),revAvg:avg(rev),starAvg:avg(stars),igAvg:avg(ig)
+  };
+}
+function r1(v){return v==null?'—':(Math.round(v*10)/10);}
+function copyIntel(){
+  const s=intelStats();if(!s.n){toast('NO AUDITS YET');return;}
+  const parts=[];
+  if(s.dmAvg!=null)parts.push('average '+r1(s.dmAvg)+' hours to answer a filler DM'+(s.dmSlow?' ('+s.dmSlow+'% took a full day or never)':''));
+  if(s.noText!=null)parts.push(s.noText+'% never text back a missed call');
+  if(s.formAvg!=null)parts.push(r1(s.formAvg)+' hours average to answer their own website form');
+  if(s.igAvg!=null)parts.push(r1(s.igAvg)+' days average since their last Instagram post');
+  const line='We secret-shopped '+s.n+' med spas as a real patient: '+parts.join(', ')+'. Whoever answers first gets the consult — right now, nobody is answering.';
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(line).then(()=>{sfx.ready();toast('PITCH LINE COPIED');},()=>prompt('Copy this:',line));
+  else prompt('Copy this:',line);
+}
 function isOverdue(l){return l.nextTouch&&(l.stage===3||l.stage===4||l.stage===5)&&new Date(l.nextTouch)<new Date(new Date().toDateString());}
 
 /* ============ GATE ============ */
 function paintBadges(){
-  const shopQ=leads.filter(l=>l.stage===1||l.stage===2).length;
+  const shopQ=leads.filter(l=>l.stage===1||l.stage===2||(l.stage===3&&auditCount(l)<5)).length;
   const closeQ=leads.filter(l=>l.stage===3||l.stage===4||l.stage===5).length;
   const od=leads.filter(isOverdue).length;
   document.querySelectorAll('.bdg').forEach(b=>b.remove());
@@ -417,7 +453,8 @@ function paintGate(){
   document.getElementById('seats').innerHTML=[0,1,2].map(i=>'<div class="seat'+(i<founding?' filled':'')+'">'+(i<founding?'CLAIMED':'SEAT '+(i+1))+'</div>').join('');
   document.getElementById('track-fill').style.width=Math.min(100,(wins.length/20)*100)+'%';
   document.getElementById('gate-left').textContent=founding>=3?'FOUNDING: SOLD OUT':'FOUNDING SEATS: '+(3-founding);
-  document.getElementById('gate-right').textContent=wins.length+'/20 CLIENTS';
+  const mrr=wins.reduce((s,l)=>s+(parseFloat(l.mrr)||0),0);
+  document.getElementById('gate-right').textContent=wins.length+'/20 CLIENTS'+(mrr?' · $'+mrr.toLocaleString()+'/MO':'');
 }
 
 /* ============ RENDER ============ */
@@ -476,13 +513,21 @@ async function addLead(){
 
 /* ---- SHOP ---- */
 function viewShop(){
-  const q=leads.filter(l=>l.stage===1||l.stage===2);
+  const q=leads.filter(l=>l.stage===1||l.stage===2||(l.stage===3&&auditCount(l)<5));
   if(shopId&&!q.find(l=>l.id===shopId))shopId=null;
   let html='<h2>SECRET SHOPPER</h2><div class="sub-h">P3 Kon + P4 Fein. Fire Day 0 tests the night the lead lands (DM + form + desk checks), call Day 1, clocks expire Day 2, flip it green. Full run = +'+(PTS.test*5+PTS.ready)+' pts.</div>';
   if(!q.length)return html+'<div class="empty"><span class="px">QUEUE CLEAR</span>The HUNT tab feeds this one.</div>';
-  if(!shopId)return html+q.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+auditCount(l)+'/5</div></div></div>').join('');
+  if(!shopId)return html+q.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+auditCount(l)+'/5</div></div>'+
+    '<div class="meta">'+(l.ig?'IG ✓':'<span class="miss">IG —</span>')+' · '+(l.phone?'PHONE ✓':'<span class="miss">PHONE —</span>')+(l.source?' · VIA '+esc(l.source):'')+' · '+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</div></div>').join('');
   const l=q.find(x=>x.id===shopId);const a=l.audit;const D=v=>v!==''&&v!=null;
-  html+='<div class="card" style="cursor:default"><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+'</div></div>';
+  html+='<div class="card" style="cursor:default"><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div>'+
+    '<div class="intel-row">'+
+    'IG: '+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> — fire the night DM here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
+    'PHONE: '+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> — lunch-rush call here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
+    'SOURCE: '+(l.source?'<b>'+esc(l.source)+'</b>':'<span class="miss">unknown</span>')+
+    ' · SCOUTED BY <b>'+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</b>'+(l.addedAt?' · '+esc(l.addedAt):'')+
+    (l.notes?'<br>NOTES: '+esc(l.notes):'')+
+    '</div></div>';
   html+=test(1,D(a.a1hrs),'DAY 0 · NIGHT DM','DM at night: \u201chow much is lip filler?\u201d Hours until reply. No reply in 48h = 48.','<input type="number" id="ad-'+l.id+'-a1hrs" placeholder="Hours" value="'+a.a1hrs+'" onchange="setAudit('+l.id+',\'a1hrs\',this.value)">',true);
   html+=test(2,!!a.a2text,'DAY 1 · LUNCH CALL','Call at lunch rush from a personal cell. Text back?','<select id="ad-'+l.id+'-a2text" onchange="setAudit('+l.id+',\'a2text\',this.value)"><option value="">Pick</option><option'+(a.a2text==='N'?' selected':'')+' value="N">N \u2014 nothing</option><option'+(a.a2text==='Y'?' selected':'')+' value="Y">Y \u2014 got text</option></select>',true);
   html+=test(3,D(a.a3hrs),'DAY 0 · WEB FORM','Fill their contact form. Hours to any reply. 48h = 48.','<input type="number" id="ad-'+l.id+'-a3hrs" placeholder="Hours" value="'+a.a3hrs+'" onchange="setAudit('+l.id+',\'a3hrs\',this.value)">',true);
@@ -491,18 +536,23 @@ function viewShop(){
   const n=auditCount(l);
   html+='<label>AUDIT AMMO \u2014 THEIR WORST NUMBERS, ONE LINE</label><textarea id="ammo-'+l.id+'" rows="2" placeholder="26 hrs to answer a filler DM, no text back, 47 reviews vs competitor 210">'+esc(l.ammo)+'</textarea>'+
   '<button class="btn mint" '+(n===5?'':'disabled')+' onclick="finishAudit('+l.id+')">'+(n===5?'FLIP TO READY · +'+PTS.ready:'RUN ALL 5 ('+n+'/5)')+'</button>'+
+  (n>0&&n<5?'<button class="btn ghost" onclick="finishAudit('+l.id+',true)">SEND PARTIAL TO CLOSE · '+n+'/5 (NO +'+PTS.ready+' BONUS)</button>':'')+
   '<button class="btn ghost" onclick="shopId=null;render()">BACK TO QUEUE</button>';
   return html;
 }
 function test(n,done,title,sub,inputs,single){return '<div class="test'+(done?' done':'')+'"><div class="t-head"><div class="badge">'+(done?'✓':n)+'</div>'+title+'<span class="pts">+'+PTS.test+'</span></div><div class="t-sub">'+sub+'</div><div class="t-in'+(single?' single':'')+'">'+inputs+'</div></div>';}
 async function setAudit(id,f,v){if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;l.audit[f]=v;if(!l.auditedBy)l.auditedBy=me;if(l.stage===1)l.stage=2;delete drafts['ad-'+id+'-'+f];sfx.pt();flyPts(PTS.test);await saveLeads();checkLevelUp();render();}
-async function finishAudit(id){
+async function finishAudit(id,partial){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  if(!partial&&auditCount(l)!==5)return;
   l.ammo=document.getElementById('ammo-'+id).value.trim();
   if(!l.ammo){toast('AMMO LINE FIRST \u2014 IT IS THE PITCH');return;}
   l.stage=3;l.auditedBy=l.auditedBy||me;l.auditedAt=new Date().toISOString().slice(0,10);
   delete drafts['ammo-'+id];
-  await saveLeads();sfx.ready();celebrate('READY TO CALL','+'+PTS.ready+' PTS · AMMO LOADED');checkLevelUp();shopId=null;go('board');
+  await saveLeads();sfx.ready();
+  if(partial)celebrate('SENT TO CLOSE','PARTIAL AUDIT · FINISH THE 5 FOR +'+PTS.ready);
+  else celebrate('READY TO CALL','+'+PTS.ready+' PTS · AMMO LOADED');
+  checkLevelUp();shopId=null;go('board');
 }
 
 /* ---- CLOSE ---- */
@@ -512,7 +562,7 @@ function closeCard(l,btns){
   (od?'<span class="overdue-pill">! OVERDUE · '+esc(l.nextTouch)+'</span>':'')+
   '<div class="nm">'+esc(l.name)+'</div>'+
   (l.ammo?'<div class="am">\u201c'+esc(l.ammo)+'\u201d</div>':'')+
-  '<div class="contact">'+(l.phone?esc(l.phone)+' · ':'')+(l.ig?esc(l.ig)+' · ':'')+esc(l.city)+
+  '<div class="contact">'+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> · ':'')+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> · ':'')+esc(l.city)+
   ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+'</div>'+
   '<div class="act-row">'+btns+'</div>'+
   '<div class="act-row"><button class="btn ghost" style="margin-top:0" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" style="margin-top:0" onclick="setTouch('+l.id+')">FOLLOW-UP</button></div></div>';
@@ -546,13 +596,28 @@ async function setTouch(id){
 }
 async function markContacted(id){const l=leads.find(x=>x.id===id);l.stage=4;sfx.tap();await saveLeads();render();}
 async function bookMeeting(id){if(needMe())return;const d=prompt('Zoom meeting date and time? (Aug 14, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.nextTouch='';await saveLeads();ptToast(PTS.meeting,'Meeting: '+l.name);celebrate('MEETING BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
-async function winLead(id){
-  if(needMe())return;const l=leads.find(x=>x.id===id);
+function winLead(id){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
   const founding=leads.filter(x=>x.stage===6&&x.result==='Won Founding').length;
-  let result='Won Standard';
-  if(founding<3&&confirm('FOUNDING CLIENT? ('+(3-founding)+' seats left)\n\nOK = Founding · Cancel = Standard'))result='Won Founding';
-  l.stage=6;l.result=result;l.closedBy=me;l.closedAt=new Date().toISOString().slice(0,10);
-  await saveLeads();flash();sfx.win();celebrate('★ CLIENT WON ★','+'+PTS.won+' PTS · '+esc(l.name).toUpperCase(),true);toast('+'+PTS.won+' PTS · '+l.name.toUpperCase()+' IS A CLIENT');checkLevelUp();render();
+  const bg=document.createElement('div');bg.className='modal-bg';bg.id='w-bg';
+  bg.onclick=e=>{if(e.target===bg)bg.remove();};
+  const opt=(tier,cls,label,sub,mrr,res)=>'<button class="btn '+cls+'" style="margin-top:10px" onclick="confirmWin('+id+',\''+tier+'\','+mrr+',\''+res+'\')">'+label+'<br><span style="font-size:7px;opacity:.85;font-weight:400">'+sub+'</span></button>';
+  bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+' SIGNED — WHICH DEAL?</h3><div class="m-city">Sizing, never negotiation. Single-provider = bottom of range, multi-room = top.</div>'+
+    (founding<3?opt('Founding','gold','FOUNDING SEAT · $2,000/MO','6-mo lock · $1,500 setup · case-study rights · '+(3-founding)+' seat'+(3-founding>1?'s':'')+' left — dies at client three','2000','Won Founding'):'')+
+    opt('Machine','mint','TIER 1 · THE MACHINE','$2,500–3,000/mo + $3,000 setup','2750','Won Standard')+
+    opt('Engine','mint','TIER 2 · THE ENGINE ★ FLAGSHIP','$4,000–4,500/mo + $4,000 setup','4250','Won Standard')+
+    opt('MarketOwner','mint','TIER 3 · MARKET OWNER','$6,000–7,500/mo + $5,000 setup','6750','Won Standard')+
+    '<button class="btn ghost" onclick="document.getElementById(\'w-bg\').remove()">CANCEL</button></div>';
+  document.body.appendChild(bg);
+}
+async function confirmWin(id,tier,defMrr,result){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const v=prompt('Locked monthly retainer for '+l.name+'? ($/mo)',defMrr);
+  if(v===null)return;
+  const el=document.getElementById('w-bg');if(el)el.remove();
+  const mrr=parseFloat(v);
+  l.stage=6;l.result=result;l.tier=tier;l.mrr=isNaN(mrr)?defMrr:mrr;l.closedBy=me;l.closedAt=new Date().toISOString().slice(0,10);
+  await saveLeads();flash();sfx.win();celebrate('★ CLIENT WON ★','+'+PTS.won+' PTS · '+esc(l.name).toUpperCase()+' · $'+l.mrr.toLocaleString()+'/MO',true);toast('+'+PTS.won+' PTS · '+l.name.toUpperCase()+' IS A CLIENT');checkLevelUp();render();
 }
 async function loseLead(id){const l=leads.find(x=>x.id===id);const r=prompt('Why? price / noshow / notinterested / nurture','nurture');if(r==='nurture'){l.stage=8;l.result='Nurture';}else{l.stage=7;l.result='Lost '+(r||'');}await saveLeads();render();}
 
@@ -579,7 +644,23 @@ function viewScore(){
   '<div class="stat"><div class="v" style="color:var(--win)">'+leads.filter(l=>l.stage===6).length+'</div><div class="k">Clients won</div></div>'+
   '<div class="stat'+(backlog>5?' warn':'')+'"><div class="v">'+backlog+'</div><div class="k">Audit backlog</div></div>'+
   '<div class="stat'+(leads.filter(isOverdue).length>0?' warn':'')+'"><div class="v">'+leads.filter(isOverdue).length+'</div><div class="k">Overdue follow-ups</div></div>'+
-  '</div><button class="btn ghost" onclick="refresh()">↻ SYNC WITH TEAM</button>';
+  '</div>';
+  const it=intelStats();
+  const wins=leads.filter(l=>l.stage===6);
+  const mrrT=wins.reduce((s,l)=>s+(parseFloat(l.mrr)||0),0);
+  html+='<h2 style="margin-top:24px">MARKET INTEL</h2><div class="sub-h">Every secret shop feeds this. These are the market’s real numbers — open every meeting and every ad with them.</div>'+
+  '<div class="stat-grid">'+
+  '<div class="stat"><div class="v">'+it.n+'</div><div class="k">Spas shopped</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--lose)">'+r1(it.dmAvg)+(it.dmAvg!=null?'h':'')+'</div><div class="k">Avg DM reply time</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--lose)">'+(it.dmSlow==null?'—':it.dmSlow+'%')+'</div><div class="k">DMs waiting 24h+</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--lose)">'+(it.noText==null?'—':it.noText+'%')+'</div><div class="k">No text-back on missed call</div></div>'+
+  '<div class="stat"><div class="v">'+r1(it.formAvg)+(it.formAvg!=null?'h':'')+'</div><div class="k">Avg web form reply</div></div>'+
+  '<div class="stat"><div class="v">'+r1(it.igAvg)+(it.igAvg!=null?'d':'')+'</div><div class="k">Avg IG silence</div></div>'+
+  '<div class="stat"><div class="v">'+r1(it.revAvg)+'</div><div class="k">Avg Google reviews</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--gold)">$'+mrrT.toLocaleString()+'</div><div class="k">Machine MRR /mo</div></div>'+
+  '</div>'+
+  (it.n?'<button class="btn gold" onclick="copyIntel()">COPY PITCH STAT LINE</button>':'')+
+  '<button class="btn ghost" onclick="refresh()">↻ SYNC WITH TEAM</button>';
   return html;
 }
 
@@ -646,7 +727,7 @@ function pongJoin(){
   pong.ch.on('presence',{event:'sync'},pongSync);
   pong.ch.on('broadcast',{event:'start'},({payload})=>pongStart(payload));
   pong.ch.on('broadcast',{event:'pad'},({payload})=>{pong.padY[payload.f]=payload.y;});
-  pong.ch.on('broadcast',{event:'state'},({payload})=>{if(!pong.host){pong.st=payload;pong.lastState=performance.now();}});
+  pong.ch.on('broadcast',{event:'state'},({payload})=>{if(!pong.host){pong.prevSt=pong.curSt||null;pong.curSt={s:payload,t:performance.now()};pong.st=payload;pong.lastState=pong.curSt.t;}});
   pong.ch.on('broadcast',{event:'end'},({payload})=>pongEnd(payload));
   pong.ch.subscribe(st=>{
     if(st==='SUBSCRIBED'){
@@ -703,7 +784,8 @@ function pongStart(pl){
   pong.active=true;pong.padY={};pong.sentY=null;pong.keys={up:false,dn:false};
   pong.players.forEach(p=>pong.padY[p.f]=p.defY);
   pong.st={bx:PW/2-BALL/2,by:PH/2-BALL/2,vx:0,vy:0,sL:0,sR:0,pads:{},hold:0};
-  pong.simT=0;pong.lastState=0;pong.sendT=0;
+  pong.simT=0;pong.lastState=0;pong.sendT=0;pong.prevSt=null;pong.curSt=null;
+  document.body.classList.add('gaming');
   pongScreen();
   let n=3;const co=document.getElementById('pg-count');co.textContent='3';sfx.ready();
   const iv=setInterval(()=>{
@@ -787,31 +869,41 @@ function pongDraw(){
     let guard=0;
     while(pong.simT<now&&guard++<8){pongTick();pong.simT+=16.7;}
     if(pong.simT<now)pong.simT=now;
-    if(pong.ch&&!pong.solo&&now-pong.sendT>80&&pong.active){pong.sendT=now;pong.ch.send({type:'broadcast',event:'state',payload:pong.st});}
+    if(pong.ch&&!pong.solo&&now-pong.sendT>66&&pong.active){pong.sendT=now;pong.ch.send({type:'broadcast',event:'state',payload:pong.st});}
   }
   const meP=pong.players.find(p=>p.f===me);
   if(meP){
     if(pong.keys.up)pong.padY[me]=Math.max(meP.minY,(pong.padY[me]!=null?pong.padY[me]:meP.defY)-7);
     if(pong.keys.dn)pong.padY[me]=Math.min(meP.maxY,(pong.padY[me]!=null?pong.padY[me]:meP.defY)+7);
-    if(pong.ch&&!pong.host&&!pong.solo&&now-pong.sendT>80&&pong.padY[me]!==pong.sentY){pong.sendT=now;pong.sentY=pong.padY[me];pong.ch.send({type:'broadcast',event:'pad',payload:{f:me,y:pong.padY[me]}});}
+    if(pong.ch&&!pong.host&&!pong.solo&&now-pong.sendT>50&&pong.padY[me]!==pong.sentY){pong.sendT=now;pong.sentY=pong.padY[me];pong.ch.send({type:'broadcast',event:'pad',payload:{f:me,y:pong.padY[me]}});}
   }
   const st=pong.st;
-  let bx=st.bx,by=st.by;
-  if(!pong.host&&!pong.solo&&pong.lastState){const dt=Math.min((now-pong.lastState)/16.7,6);bx+=st.vx*dt;by+=st.vy*dt;}
+  let bx=st.bx,by=st.by,ipads=null;
+  if(!pong.host&&!pong.solo&&pong.curSt){
+    const cur=pong.curSt,prev=pong.prevSt,rt=now-110;
+    if(prev&&cur.t>prev.t&&Math.abs(cur.s.bx-prev.s.bx)<90&&Math.abs(cur.s.by-prev.s.by)<90){
+      const a=Math.max(0,Math.min(1.3,(rt-prev.t)/(cur.t-prev.t))),L=(u,v)=>u+(v-u)*a;
+      bx=L(prev.s.bx,cur.s.bx);by=L(prev.s.by,cur.s.by);
+      ipads={};for(const k in (cur.s.pads||{}))ipads[k]=(prev.s.pads&&prev.s.pads[k]!=null)?L(prev.s.pads[k],cur.s.pads[k]):cur.s.pads[k];
+    }else{
+      const dt=Math.min((now-cur.t)/16.7,6);
+      bx=cur.s.bx+cur.s.vx*dt;by=cur.s.by+cur.s.vy*dt;ipads=cur.s.pads;
+    }
+  }
   cx.clearRect(0,0,PW,PH);
   cx.strokeStyle='rgba(143,132,184,.4)';cx.setLineDash([6,10]);cx.beginPath();cx.moveTo(PW/2,0);cx.lineTo(PW/2,PH);cx.stroke();cx.setLineDash([]);
   pong.players.forEach(p=>{
     let y;
     if(p.f===me)y=pong.padY[me];
     else if(pong.host||pong.solo)y=pong.padY[p.f];
-    else y=st.pads&&st.pads[p.f]!=null?st.pads[p.f]:null;
+    else y=(ipads&&ipads[p.f]!=null)?ipads[p.f]:(st.pads&&st.pads[p.f]!=null?st.pads[p.f]:null);
     if(y==null)y=p.defY;
-    cx.fillStyle=P[p.f]?P[p.f].hex:'#8F84B8';
-    cx.shadowColor=cx.fillStyle;cx.shadowBlur=12;
-    cx.fillRect(p.side==='L'?14:PW-14-PAD_W,y,PAD_W,p.h);
+    const c=P[p.f]?P[p.f].hex:'#8F84B8',x=p.side==='L'?14:PW-14-PAD_W;
+    cx.globalAlpha=.28;cx.fillStyle=c;cx.fillRect(x-3,y-3,PAD_W+6,p.h+6);
+    cx.globalAlpha=1;cx.fillRect(x,y,PAD_W,p.h);
   });
-  cx.fillStyle='#FFD34D';cx.shadowColor='#FFD34D';cx.shadowBlur=14;
-  cx.fillRect(bx,by,BALL,BALL);cx.shadowBlur=0;
+  cx.globalAlpha=.3;cx.fillStyle='#FFD34D';cx.fillRect(bx-3,by-3,BALL+6,BALL+6);
+  cx.globalAlpha=1;cx.fillRect(bx,by,BALL,BALL);
   if(!pong.host&&!pong.solo&&pong.lastState&&now-pong.lastState>2500){
     cx.fillStyle='rgba(7,5,18,.65)';cx.fillRect(0,0,PW,PH);
     cx.fillStyle='#8F84B8';cx.font='10px "Press Start 2P"';cx.textAlign='center';
@@ -826,6 +918,7 @@ function pongEnd(pl){
   if(!pong.active)return;
   const wasSolo=pong.solo,mySide=(pong.players.find(p=>p.f===me)||{}).side;
   pong.active=false;pong.solo=false;cancelAnimationFrame(pong.raf);pong.raf=0;pong.simT=0;
+  document.body.classList.remove('gaming');
   const wn=pl.w==='L'?'TEAM GOLD':'TEAM ICE',sc=Math.max(pl.sL,pl.sR)+'-'+Math.min(pl.sL,pl.sR);
   if(wasSolo){
     pong.joined=false;
@@ -836,6 +929,7 @@ function pongEnd(pl){
 }
 function pongAbortLocal(msg){
   pong.active=false;pong.solo=false;cancelAnimationFrame(pong.raf);pong.raf=0;pong.simT=0;
+  document.body.classList.remove('gaming');
   if(msg)toast(msg);
   if(tab==='game')render();
 }
@@ -850,6 +944,7 @@ function pongLeave(){
   cancelAnimationFrame(pong.raf);pong.raf=0;
   if(pong.ch){try{pong.ch.unsubscribe();}catch(e){}pong.ch=null;}
   pong.joined=false;pong.active=false;pong.solo=false;pong.host=false;pong.roster=[];pong.players=[];pong.simT=0;
+  document.body.classList.remove('gaming');
   document.onkeydown=null;document.onkeyup=null;
 }
 
