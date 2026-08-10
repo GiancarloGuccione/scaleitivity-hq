@@ -78,6 +78,7 @@ h2{font-family:'Press Start 2P';font-size:13px;margin:14px 0 6px;color:var(--txt
 label{display:block;font-family:'Press Start 2P';font-size:7px;color:var(--dim);margin:14px 0 6px;letter-spacing:.05em}
 input,select,textarea{width:100%;background:#0A0716;border:2px solid var(--line);padding:12px;color:var(--txt);font-family:'Outfit';font-size:15px}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 10px rgba(255,211,77,.3)}
+input[type="date"]{color-scheme:dark;min-height:47px;-webkit-appearance:none;appearance:none}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{width:100%;border:none;padding:15px;font-family:'Press Start 2P';font-size:9px;cursor:pointer;margin-top:16px;border:2px solid transparent}
 .btn:active{transform:translate(2px,2px)}
@@ -431,11 +432,12 @@ function intelStats(){
   const nums=k=>A.map(l=>parseFloat(l.audit[k])).filter(v=>!isNaN(v));
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
   const dm=nums('a1hrs'),form=nums('a3hrs'),rev=nums('a4count'),stars=nums('a4stars'),ig=nums('a5days');
-  const t2=A.filter(l=>l.audit.a2text==='N'||l.audit.a2text==='Y');
+  const yn=l=>{const s=(l.audit.a2text||'').toString().trim().toLowerCase();return s.startsWith('n')?'N':(s.startsWith('y')?'Y':null);};
+  const t2=A.filter(l=>yn(l)!==null);
   return {
     n:A.length,
     dmAvg:avg(dm),dmSlow:dm.length?Math.round(100*dm.filter(v=>v>=24).length/dm.length):null,
-    noText:t2.length?Math.round(100*t2.filter(l=>l.audit.a2text==='N').length/t2.length):null,
+    noText:t2.length?Math.round(100*t2.filter(l=>yn(l)==='N').length/t2.length):null,
     formAvg:avg(form),revAvg:avg(rev),starAvg:avg(stars),igAvg:avg(ig)
   };
 }
@@ -569,11 +571,11 @@ function viewShop(){
     ' · SCOUTED BY <b>'+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</b>'+(l.addedAt?' · '+esc(l.addedAt):'')+
     (l.notes?'<br>NOTES: '+esc(l.notes):'')+
     '</div>'+(c=>c?'<div class="clock '+c.cls+'">'+c.txt+'</div>':'')(auditClock(l))+'</div>';
-  html+=test(1,D(a.a1hrs),'DAY 0 · NIGHT DM','DM at night: \u201chow much is lip filler?\u201d Hours until reply. No reply in 48h = 48.','<input type="number" id="ad-'+l.id+'-a1hrs" placeholder="Hours" value="'+a.a1hrs+'" onchange="setAudit('+l.id+',\'a1hrs\',this.value)">',true);
-  html+=test(2,!!a.a2text,'DAY 1 · LUNCH CALL','Call at lunch rush from a personal cell. Text back?','<select id="ad-'+l.id+'-a2text" onchange="setAudit('+l.id+',\'a2text\',this.value)"><option value="">Pick</option><option'+(a.a2text==='N'?' selected':'')+' value="N">N \u2014 nothing</option><option'+(a.a2text==='Y'?' selected':'')+' value="Y">Y \u2014 got text</option></select>',true);
-  html+=test(3,D(a.a3hrs),'DAY 0 · WEB FORM','Fill their contact form. Hours to any reply. 48h = 48.','<input type="number" id="ad-'+l.id+'-a3hrs" placeholder="Hours" value="'+a.a3hrs+'" onchange="setAudit('+l.id+',\'a3hrs\',this.value)">',true);
-  html+=test(4,D(a.a4count),'DAY 0 · GOOGLE REVIEWS','Count reviews and stars.','<input type="number" id="ad-'+l.id+'-a4count" placeholder="# reviews" value="'+a.a4count+'" onchange="setAudit('+l.id+',\'a4count\',this.value)"><input type="number" step="0.1" id="ad-'+l.id+'-a4stars" placeholder="Stars" value="'+a.a4stars+'" onchange="setAudit('+l.id+',\'a4stars\',this.value)">',false);
-  html+=test(5,D(a.a5days),'DAY 0 · IG PULSE','Days since last post.','<input type="number" id="ad-'+l.id+'-a5days" placeholder="Days" value="'+a.a5days+'" onchange="setAudit('+l.id+',\'a5days\',this.value)">',true);
+  html+=test(1,D(a.a1hrs),'DAY 0 · NIGHT DM','DM at night: \u201chow much is lip filler?\u201d Hours until reply. No reply in 48h = 48.','<input id="ad-'+l.id+'-a1hrs" placeholder="hrs + detail: 26, replied once then ghosted" value="'+esc(a.a1hrs)+'" onchange="setAudit('+l.id+',\'a1hrs\',this.value)">',true);
+  html+=test(2,!!a.a2text,'DAY 1 · LUNCH CALL','Call at lunch rush from a personal cell. Text back?','<input id="ad-'+l.id+'-a2text" placeholder="Y or N + detail: N, rang out, no text back" value="'+esc(a.a2text)+'" onchange="setAudit('+l.id+',\'a2text\',this.value)">',true);
+  html+=test(3,D(a.a3hrs),'DAY 0 · WEB FORM','Fill their contact form. Hours to any reply. 48h = 48.','<input id="ad-'+l.id+'-a3hrs" placeholder="hrs + detail: 48, auto-reply only" value="'+esc(a.a3hrs)+'" onchange="setAudit('+l.id+',\'a3hrs\',this.value)">',true);
+  html+=test(4,D(a.a4count),'DAY 0 · GOOGLE REVIEWS','Count reviews and stars.','<input id="ad-'+l.id+'-a4count" placeholder="# reviews: 47" value="'+esc(a.a4count)+'" onchange="setAudit('+l.id+',\'a4count\',this.value)"><input id="ad-'+l.id+'-a4stars" placeholder="stars + note: 4.2, recent 1-stars" value="'+esc(a.a4stars)+'" onchange="setAudit('+l.id+',\'a4stars\',this.value)">',false);
+  html+=test(5,D(a.a5days),'DAY 0 · IG PULSE','Pick the date of their last IG post — days since are computed for the pitch.'+(D(a.a5days)?' Currently: '+esc(a.a5days)+' days.':''),'<input type="date" id="ad-'+l.id+'-a5date" value="'+esc(a.a5date||'')+'" onchange="setAudit('+l.id+',\'a5date\',this.value)">',true);
   const n=auditCount(l);
   html+='<label>AUDIT AMMO \u2014 THEIR WORST NUMBERS, ONE LINE</label><textarea id="ammo-'+l.id+'" rows="2" placeholder="26 hrs to answer a filler DM, no text back, 47 reviews vs competitor 210">'+esc(l.ammo)+'</textarea>'+
   '<button class="btn mint" '+(n===5?'':'disabled')+' onclick="finishAudit('+l.id+')">'+(n===5?'FLIP TO READY · +'+PTS.ready:'RUN ALL 5 ('+n+'/5)')+'</button>'+
@@ -582,7 +584,8 @@ function viewShop(){
   return html;
 }
 function test(n,done,title,sub,inputs,single){return '<div class="test'+(done?' done':'')+'"><div class="t-head"><div class="badge">'+(done?'✓':n)+'</div>'+title+'<span class="pts">+'+PTS.test+'</span></div><div class="t-sub">'+sub+'</div><div class="t-in'+(single?' single':'')+'">'+inputs+'</div></div>';}
-async function setAudit(id,f,v){if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;l.audit[f]=v;if(!l.auditedBy)l.auditedBy=me;if(l.stage===1)l.stage=2;delete drafts['ad-'+id+'-'+f];sfx.pt();flyPts(PTS.test);await saveLeads();checkLevelUp();render();}
+async function setAudit(id,f,v){if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;l.audit[f]=v;
+  if(f==='a5date')l.audit.a5days=v?String(Math.max(0,Math.floor((Date.now()-new Date(v+'T12:00:00').getTime())/86400000))):'';if(!l.auditedBy)l.auditedBy=me;if(l.stage===1)l.stage=2;delete drafts['ad-'+id+'-'+f];sfx.pt();flyPts(PTS.test);await saveLeads();checkLevelUp();render();}
 async function finishAudit(id,partial){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
   if(!partial&&auditCount(l)!==5)return;
