@@ -812,6 +812,11 @@ function pongDraw(){
   });
   cx.fillStyle='#FFD34D';cx.shadowColor='#FFD34D';cx.shadowBlur=14;
   cx.fillRect(bx,by,BALL,BALL);cx.shadowBlur=0;
+  if(!pong.host&&!pong.solo&&pong.lastState&&now-pong.lastState>2500){
+    cx.fillStyle='rgba(7,5,18,.65)';cx.fillRect(0,0,PW,PH);
+    cx.fillStyle='#8F84B8';cx.font='10px "Press Start 2P"';cx.textAlign='center';
+    cx.fillText('HOST PAUSED — HANG TIGHT…',PW/2,PH/2);cx.textAlign='left';
+  }
   const sl=document.getElementById('pg-sl'),sr=document.getElementById('pg-sr');
   if(sl&&sl.textContent!==String(st.sL)){sl.textContent=st.sL;sfx.pt();}
   if(sr&&sr.textContent!==String(st.sR)){sr.textContent=st.sR;sfx.pt();}
