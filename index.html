@@ -458,7 +458,7 @@ function leadTs(l){return l.ts||(l.addedAt?new Date(l.addedAt+'T00:00:00').getTi
 function auditClock(l){
   if(auditCount(l)===5&&l.ammo)return null;
   const t=leadTs(l);if(!t)return null;
-  const h=Math.floor((Date.now()-t)/3600000);
+  const h=Math.max(0,Math.floor((Date.now()-t)/3600000));
   if(h<24)return {cls:'ok',txt:'⏱ DAY 0 · '+h+'H IN — FIRE DM + FORM + DESK TONIGHT'};
   if(h<48)return {cls:'warn',txt:'⏱ DAY 1 · '+h+'H IN — LUNCH CALL TODAY'};
   if(h<72)return {cls:'hot',txt:'⏱ DAY 2 · CLOCK EXPIRING — FLIP IT TODAY'};
