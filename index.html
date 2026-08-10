@@ -235,6 +235,21 @@ body.gaming .logo{animation:none}
 .intel-row{margin-top:9px;font-size:12.5px;color:var(--dim);line-height:2}
 .intel-row b{color:var(--txt);font-weight:800}
 .miss{color:var(--lose);font-weight:700}
+/* audit clock chips */
+.clock{font-family:'Press Start 2P';font-size:6px;padding:5px 8px;display:inline-block;margin-top:9px;line-height:1.6}
+.clock.ok{color:#0B2E18;background:var(--win)}
+.clock.warn{color:#141414;background:var(--gold)}
+.clock.hot{color:#fff;background:var(--lose);animation:blink 1s steps(2) infinite}
+/* day-30 proof checklist */
+.proof-row{display:flex;align-items:center;gap:11px;border:2px solid var(--line);padding:11px;margin-top:8px;font-size:13.5px;font-weight:700;cursor:pointer}
+.proof-row.done{border-color:var(--win)}
+.proof-row input{width:auto;accent-color:var(--win);transform:scale(1.5);cursor:pointer}
+.d30-chip{font-family:'Press Start 2P';font-size:6px;padding:4px 7px;display:inline-block;background:#0A0716;border:2px solid var(--gold);color:var(--gold)}
+.d30-chip.danger{border-color:var(--lose);color:var(--lose);animation:blink 1s steps(2) infinite}
+/* source scoreboard */
+.src-row{display:grid;grid-template-columns:1fr 70px 70px;padding:11px 12px;border-bottom:2px solid #0A0716;font-size:13.5px;font-weight:700;align-items:center}
+.src-row:last-child{border-bottom:none}
+.src-row .h{font-family:'Press Start 2P';font-size:6.5px;color:var(--dim);font-weight:400}
 </style>
 </head>
 <body>
@@ -436,7 +451,24 @@ function copyIntel(){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(line).then(()=>{sfx.ready();toast('PITCH LINE COPIED');},()=>prompt('Copy this:',line));
   else prompt('Copy this:',line);
 }
-function isOverdue(l){return l.nextTouch&&(l.stage===3||l.stage===4||l.stage===5)&&new Date(l.nextTouch)<new Date(new Date().toDateString());}
+function isOverdue(l){return l.nextTouch&&(l.stage===3||l.stage===4||l.stage===5||l.stage===8)&&new Date(l.nextTouch)<new Date(new Date().toDateString());}
+
+/* ============ AUDIT CLOCK (Day 0 fire / Day 1 call / Day 2 flip) ============ */
+function leadTs(l){return l.ts||(l.addedAt?new Date(l.addedAt+'T00:00:00').getTime():0);}
+function auditClock(l){
+  if(auditCount(l)===5&&l.ammo)return null;
+  const t=leadTs(l);if(!t)return null;
+  const h=Math.floor((Date.now()-t)/3600000);
+  if(h<24)return {cls:'ok',txt:'⏱ DAY 0 · '+h+'H IN — FIRE DM + FORM + DESK TONIGHT'};
+  if(h<48)return {cls:'warn',txt:'⏱ DAY 1 · '+h+'H IN — LUNCH CALL TODAY'};
+  if(h<72)return {cls:'hot',txt:'⏱ DAY 2 · CLOCK EXPIRING — FLIP IT TODAY'};
+  return {cls:'hot',txt:'⏱ EXPIRED · '+Math.floor(h/24)+' DAYS IN — FLIP OR KILL'};
+}
+function sourceStats(){
+  const m={};
+  leads.forEach(l=>{const k=(l.source||'').trim().toLowerCase();if(!k)return;m[k]=m[k]||{n:0,w:0,label:l.source.trim()};m[k].n++;if(l.stage===6)m[k].w++;});
+  return Object.values(m).sort((a,b)=>b.w-a.w||b.n-a.n).slice(0,6);
+}
 
 /* ============ GATE ============ */
 function paintBadges(){
@@ -489,7 +521,15 @@ function cardHTML(l){
   '<div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div>'+
   '<div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div></div>'+
   (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
-  '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+'</div></div>';
+  '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+(l.mrr?' · $'+(+l.mrr).toLocaleString()+'/mo':'')+'</div>'+
+  d30Chip(l)+'</div>';
+}
+function d30Chip(l){
+  if(l.stage!==6||!l.closedAt)return '';
+  const pc=['live','revival','consults'].filter(k=>l.proof&&l.proof[k]).length;
+  if(pc===3)return '<div style="margin-top:9px"><span class="d30-chip" style="border-color:var(--win);color:var(--win)">✓ DAY 30 PROOF LOCKED</span></div>';
+  const left=Math.max(0,30-daysAgo(l.closedAt));
+  return '<div style="margin-top:9px"><span class="d30-chip'+(left<=7?' danger':'')+'">D30 PROOF: '+pc+'/3 · '+(left>0?left+' DAYS LEFT':'DUE NOW')+'</span></div>';
 }
 
 /* ---- HUNT ---- */
@@ -506,7 +546,7 @@ async function addLead(){
   const name=document.getElementById('f-name').value.trim();
   const city=document.getElementById('f-city').value.trim();
   if(!name||!city){toast('NAME + CITY REQUIRED');return;}
-  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
+  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
   clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-source']);
   await saveLeads();ptToast(PTS.add,name+' sent to the shopper queue');flyPts(PTS.add);burst(lastTap.x||innerWidth/2,lastTap.y||innerHeight/2,16);checkLevelUp();go('board');
 }
@@ -518,7 +558,8 @@ function viewShop(){
   let html='<h2>SECRET SHOPPER</h2><div class="sub-h">P3 Kon + P4 Fein. Fire Day 0 tests the night the lead lands (DM + form + desk checks), call Day 1, clocks expire Day 2, flip it green. Full run = +'+(PTS.test*5+PTS.ready)+' pts.</div>';
   if(!q.length)return html+'<div class="empty"><span class="px">QUEUE CLEAR</span>The HUNT tab feeds this one.</div>';
   if(!shopId)return html+q.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+auditCount(l)+'/5</div></div>'+
-    '<div class="meta">'+(l.ig?'IG ✓':'<span class="miss">IG —</span>')+' · '+(l.phone?'PHONE ✓':'<span class="miss">PHONE —</span>')+(l.source?' · VIA '+esc(l.source):'')+' · '+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</div></div>').join('');
+    '<div class="meta">'+(l.ig?'IG ✓':'<span class="miss">IG —</span>')+' · '+(l.phone?'PHONE ✓':'<span class="miss">PHONE —</span>')+(l.source?' · VIA '+esc(l.source):'')+' · '+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</div>'+
+    (c=>c?'<div class="clock '+c.cls+'">'+c.txt+'</div>':'')(auditClock(l))+'</div>').join('');
   const l=q.find(x=>x.id===shopId);const a=l.audit;const D=v=>v!==''&&v!=null;
   html+='<div class="card" style="cursor:default"><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div>'+
     '<div class="intel-row">'+
@@ -527,7 +568,7 @@ function viewShop(){
     'SOURCE: '+(l.source?'<b>'+esc(l.source)+'</b>':'<span class="miss">unknown</span>')+
     ' · SCOUTED BY <b>'+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</b>'+(l.addedAt?' · '+esc(l.addedAt):'')+
     (l.notes?'<br>NOTES: '+esc(l.notes):'')+
-    '</div></div>';
+    '</div>'+(c=>c?'<div class="clock '+c.cls+'">'+c.txt+'</div>':'')(auditClock(l))+'</div>';
   html+=test(1,D(a.a1hrs),'DAY 0 · NIGHT DM','DM at night: \u201chow much is lip filler?\u201d Hours until reply. No reply in 48h = 48.','<input type="number" id="ad-'+l.id+'-a1hrs" placeholder="Hours" value="'+a.a1hrs+'" onchange="setAudit('+l.id+',\'a1hrs\',this.value)">',true);
   html+=test(2,!!a.a2text,'DAY 1 · LUNCH CALL','Call at lunch rush from a personal cell. Text back?','<select id="ad-'+l.id+'-a2text" onchange="setAudit('+l.id+',\'a2text\',this.value)"><option value="">Pick</option><option'+(a.a2text==='N'?' selected':'')+' value="N">N \u2014 nothing</option><option'+(a.a2text==='Y'?' selected':'')+' value="Y">Y \u2014 got text</option></select>',true);
   html+=test(3,D(a.a3hrs),'DAY 0 · WEB FORM','Fill their contact form. Hours to any reply. 48h = 48.','<input type="number" id="ad-'+l.id+'-a3hrs" placeholder="Hours" value="'+a.a3hrs+'" onchange="setAudit('+l.id+',\'a3hrs\',this.value)">',true);
@@ -574,13 +615,22 @@ function viewClose(){
   let html='<h2>THE CLOSE</h2><div class="sub-h">P1 Giancarlo only. Call the green stack, open with the ammo line, book the Zoom. MEETING +'+PTS.meeting+' · WON +'+PTS.won+'.</div>';
   if(booked.length){
     html+='<label>MEETINGS ON THE CALENDAR</label>';
-    booked.forEach(l=>{html+=closeCard(l,'<button class="btn mint" onclick="winLead('+l.id+')">WON ★</button><button class="btn red" onclick="loseLead('+l.id+')">LOST</button>');});
+    booked.forEach(l=>{html+=closeCard(l,'<button class="btn mint" onclick="winLead('+l.id+')">WON ★</button><button class="btn red" onclick="loseLead('+l.id+')">LOST</button><button class="btn ghost" style="margin-top:0" onclick="noShow('+l.id+')">NO-SHOW</button>');});
   }
   if(ready.length){
     html+='<label>READY TO CALL \u2014 THE GREEN STACK</label>';
     ready.forEach(l=>{html+=closeCard(l,'<button class="btn gold" onclick="bookMeeting('+l.id+')">BOOK ZOOM · +'+PTS.meeting+'</button>'+(l.stage===3?'<button class="btn ghost" style="margin-top:0" onclick="markContacted('+l.id+')">CONTACTED</button>':''));});
   }
   if(!ready.length&&!booked.length)html+='<div class="empty"><span class="px">NO TARGETS</span>The SHOP tab turns cards green. Green lands here.</div>';
+  const due=leads.filter(l=>l.stage===8&&l.nextTouch&&new Date(l.nextTouch)<=new Date());
+  if(due.length){
+    html+='<label>REVIVE — NURTURE LEADS DUE FOR A TOUCH</label>';
+    due.forEach(l=>{
+      html+='<div class="card" style="cursor:default"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.phone?' · '+esc(l.phone):'')+'</div></div><div class="stage-pill st8">NURTURE</div></div>'+
+      (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
+      '<div class="act-row"><button class="btn gold" style="margin-top:0" onclick="reviveLead('+l.id+')">REVIVE → READY</button><button class="btn ghost" style="margin-top:0" onclick="snoozeLead('+l.id+')">SNOOZE 30D</button></div></div>';
+    });
+  }
   return html;
 }
 async function logDial(id){
@@ -595,7 +645,7 @@ async function setTouch(id){
   if(!d)return;l.nextTouch=d;await saveLeads();toast('FOLLOW-UP SET');render();
 }
 async function markContacted(id){const l=leads.find(x=>x.id===id);l.stage=4;sfx.tap();await saveLeads();render();}
-async function bookMeeting(id){if(needMe())return;const d=prompt('Zoom meeting date and time? (Aug 14, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.nextTouch='';await saveLeads();ptToast(PTS.meeting,'Meeting: '+l.name);celebrate('MEETING BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
+async function bookMeeting(id){if(needMe())return;const d=prompt('Zoom meeting date and time? (Aug 14, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.bookings=(l.bookings||0)+1;l.nextTouch='';await saveLeads();ptToast(PTS.meeting,'Meeting: '+l.name);celebrate('MEETING BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
 function winLead(id){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
   const founding=leads.filter(x=>x.stage===6&&x.result==='Won Founding').length;
@@ -619,7 +669,23 @@ async function confirmWin(id,tier,defMrr,result){
   l.stage=6;l.result=result;l.tier=tier;l.mrr=isNaN(mrr)?defMrr:mrr;l.closedBy=me;l.closedAt=new Date().toISOString().slice(0,10);
   await saveLeads();flash();sfx.win();celebrate('★ CLIENT WON ★','+'+PTS.won+' PTS · '+esc(l.name).toUpperCase()+' · $'+l.mrr.toLocaleString()+'/MO',true);toast('+'+PTS.won+' PTS · '+l.name.toUpperCase()+' IS A CLIENT');checkLevelUp();render();
 }
-async function loseLead(id){const l=leads.find(x=>x.id===id);const r=prompt('Why? price / noshow / notinterested / nurture','nurture');if(r==='nurture'){l.stage=8;l.result='Nurture';}else{l.stage=7;l.result='Lost '+(r||'');}await saveLeads();render();}
+async function loseLead(id){const l=leads.find(x=>x.id===id);const r=prompt('Why? price / noshow / notinterested / nurture','nurture');if(r===null)return;if(r==='nurture'){l.stage=8;l.result='Nurture';l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);toast('NURTURE — AUTO RE-SURFACES IN 30D');}else{l.stage=7;l.result='Lost '+(r||'');}await saveLeads();render();}
+async function noShow(id){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  l.noShows=(l.noShows||0)+1;l.stage=4;l.meetingDate='';
+  l.nextTouch=new Date(Date.now()+86400000).toISOString().slice(0,10);
+  await saveLeads();toast('NO-SHOW LOGGED — CHASE + REBOOK');render();
+}
+async function reviveLead(id){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  l.stage=3;l.nextTouch='';
+  await saveLeads();sfx.ready();toast(l.name.toUpperCase()+' BACK IN THE GREEN STACK');render();
+}
+async function snoozeLead(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  await saveLeads();toast('SNOOZED 30 DAYS');render();
+}
 
 /* ---- SCORE ---- */
 function viewScore(){
@@ -644,6 +710,10 @@ function viewScore(){
   '<div class="stat"><div class="v" style="color:var(--win)">'+leads.filter(l=>l.stage===6).length+'</div><div class="k">Clients won</div></div>'+
   '<div class="stat'+(backlog>5?' warn':'')+'"><div class="v">'+backlog+'</div><div class="k">Audit backlog</div></div>'+
   '<div class="stat'+(leads.filter(isOverdue).length>0?' warn':'')+'"><div class="v">'+leads.filter(isOverdue).length+'</div><div class="k">Overdue follow-ups</div></div>'+
+  (()=>{const tb=leads.reduce((s,l)=>s+(l.bookings||(l.bookedBy?1:0)),0),ns=leads.reduce((s,l)=>s+(l.noShows||0),0);
+    const sr=tb?Math.round(100*(tb-ns)/tb):null;
+    return '<div class="stat'+(sr!=null&&sr<70?' warn':'')+'"><div class="v">'+(sr==null?'—':sr+'%')+'</div><div class="k">Meeting show rate</div></div>'+
+    '<div class="stat"><div class="v">'+ns+'</div><div class="k">No-shows chased</div></div>';})()+
   '</div>';
   const it=intelStats();
   const wins=leads.filter(l=>l.stage===6);
@@ -659,8 +729,15 @@ function viewScore(){
   '<div class="stat"><div class="v">'+r1(it.revAvg)+'</div><div class="k">Avg Google reviews</div></div>'+
   '<div class="stat"><div class="v" style="color:var(--gold)">$'+mrrT.toLocaleString()+'</div><div class="k">Machine MRR /mo</div></div>'+
   '</div>'+
-  (it.n?'<button class="btn gold" onclick="copyIntel()">COPY PITCH STAT LINE</button>':'')+
-  '<button class="btn ghost" onclick="refresh()">↻ SYNC WITH TEAM</button>';
+  (it.n?'<button class="btn gold" onclick="copyIntel()">COPY PITCH STAT LINE</button>':'');
+  const src=sourceStats();
+  if(src.length){
+    html+='<h2 style="margin-top:24px">SOURCE SCOREBOARD</h2><div class="sub-h">Where wins actually come from. Hunt where it converts.</div>'+
+    '<div class="hs"><div class="src-row"><span class="h">SOURCE</span><span class="h" style="text-align:right">LEADS</span><span class="h" style="text-align:right">WON</span></div>'+
+    src.map(s=>'<div class="src-row"><span>'+esc(s.label)+'</span><span style="text-align:right">'+s.n+'</span><span style="text-align:right;color:'+(s.w?'var(--win)':'var(--dim)')+'">'+s.w+'</span></div>').join('')+
+    '</div>';
+  }
+  html+='<button class="btn ghost" onclick="refresh()">↻ SYNC WITH TEAM</button>';
   return html;
 }
 
@@ -672,11 +749,28 @@ function openLead(id){
   let so='';for(let s=1;s<=8;s++)so+='<option value="'+s+'"'+(l.stage===s?' selected':'')+'>'+STAGES[s].n+'</option>';
   bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+'</h3><div class="m-city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+(l.phone?' · '+esc(l.phone):'')+'</div>'+
   (l.ammo?'<div class="ammo" style="margin-bottom:10px;background:#0A0716;border-left:4px solid var(--gold);padding:8px 10px;font-size:12.5px;color:var(--gold)">▶ '+esc(l.ammo)+'</div>':'')+
+  (l.stage===6&&l.closedAt?(()=>{
+    const pc=['live','revival','consults'].filter(k=>l.proof&&l.proof[k]).length;
+    const left=Math.max(0,30-daysAgo(l.closedAt));
+    const row=(k,txt)=>'<label class="proof-row'+(l.proof&&l.proof[k]?' done':'')+'" style="font-family:\'Outfit\';margin:8px 0 0;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--txt)"><input type="checkbox" '+(l.proof&&l.proof[k]?'checked':'')+' onchange="toggleProof('+l.id+',\''+k+'\')">'+txt+'</label>';
+    return '<label>DAY 30 PROOF CHECKPOINT · '+(pc===3?'LOCKED ✓':(left>0?left+' DAYS LEFT':'DUE NOW — SETUP FEE AT RISK'))+'</label>'+
+      row('live','Machine live — answering in under 60 seconds')+
+      row('revival','Ghost Patient Revival fired')+
+      row('consults','Consults on the calendar');
+  })():'')+
   '<label>STAGE</label><select id="m-stage">'+so+'</select>'+
   '<label>NOTES</label><textarea id="m-notes" rows="3">'+esc(l.notes)+'</textarea>'+
   '<button class="btn gold" onclick="saveLeadEdit('+l.id+')">SAVE</button>'+
   '<button class="btn ghost" onclick="document.getElementById(\'m-bg\').remove()">CLOSE</button></div>';
   document.body.appendChild(bg);
+}
+async function toggleProof(id,k){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  l.proof=l.proof||{};l.proof[k]=!l.proof[k];
+  await saveLeads();
+  const pc=['live','revival','consults'].filter(x=>l.proof[x]).length;
+  if(pc===3){sfx.win();celebrate('PROOF LOCKED','DAY 30 DELIVERED · '+esc(l.name).toUpperCase()+' STAYS',true);}
+  else sfx.pt();
 }
 async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);l.stage=parseInt(document.getElementById('m-stage').value);l.notes=document.getElementById('m-notes').value;document.getElementById('m-bg').remove();await saveLeads();render();}
 
