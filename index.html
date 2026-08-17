@@ -527,8 +527,10 @@ function viewBoard(){
   const counts={0:leads.length};for(let s=1;s<=8;s++)counts[s]=leads.filter(l=>l.stage===s).length;
   let chips='<div class="chips"><div class="chip'+(filter===0?' on':'')+'" onclick="filter=0;render()">ALL<span class="n">'+counts[0]+'</span></div>';
   for(let s=1;s<=8;s++)chips+='<div class="chip'+(filter===s?' on':'')+'" onclick="filter='+s+';render()">'+STAGES[s].n+'<span class="n">'+counts[s]+'</span></div>';
+  const noAddr=leads.filter(l=>!l.address).length;
+  if(noAddr)chips+='<div class="chip'+(filter==='noaddr'?' on':'')+'" style="border-color:var(--lose);color:'+(filter==='noaddr'?'#141414':'var(--lose)')+'" onclick="filter=\'noaddr\';render()">NO ADDRESS<span class="n">'+noAddr+'</span></div>';
   chips+='</div>';
-  const list=leads.filter(l=>filter===0||l.stage===filter).sort((a,b)=>a.stage-b.stage);
+  const list=leads.filter(l=>filter===0||(filter==='noaddr'?!l.address:l.stage===filter)).sort((a,b)=>a.stage-b.stage);
   let cards=list.map(cardHTML).join('');
   if(!leads.length)cards='<div class="empty"><span class="px">STAGE EMPTY</span>First blood goes to whoever adds a spa.<br>HUNT tab. Go.</div>';
   else if(!list.length)cards='<div class="empty">Nothing in this stage yet.</div>';
@@ -540,7 +542,8 @@ function cardHTML(l){
   '<div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div>'+
   '<div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div></div>'+
   (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
-  '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+(l.mrr?' · $'+(+l.mrr).toLocaleString()+'/mo':'')+'</div>'+
+  '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+(l.mrr?' · $'+(+l.mrr).toLocaleString()+'/mo':'')+
+  (l.address?'<br>📍 '+esc(l.address):' · <span class="miss">NO ADDRESS — TAP TO ADD</span>')+'</div>'+
   d30Chip(l)+'</div>';
 }
 function d30Chip(l){
@@ -557,7 +560,7 @@ function viewHunt(){
   '<label>SPA NAME *</label><input id="f-name" placeholder="Glow Aesthetics">'+
   '<div class="row2"><div><label>CITY *</label><input id="f-city" placeholder="Newport Beach"></div><div><label>OWNER</label><input id="f-owner" placeholder="Dr. Sarah Kim"></div></div>'+
   '<div class="row2"><div><label>PHONE</label><input id="f-phone" placeholder="949 555 0142"></div><div><label>INSTAGRAM</label><input id="f-ig" placeholder="@glowaesthetics"></div></div>'+
-  '<label>BUSINESS ADDRESS</label><input id="f-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA">'+
+  '<label>BUSINESS ADDRESS * (WE MAIL REPORTS HERE)</label><input id="f-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660">'+
   '<label>SOURCE</label><input id="f-source" placeholder="IG hashtag, drove past, referral...">'+
   '<button class="btn gold" onclick="addLead()">DROP ON BOARD · +'+PTS.add+'</button>';
 }
@@ -565,8 +568,10 @@ async function addLead(){
   if(needMe())return;
   const name=document.getElementById('f-name').value.trim();
   const city=document.getElementById('f-city').value.trim();
+  const address=document.getElementById('f-address').value.trim();
   if(!name||!city){toast('NAME + CITY REQUIRED');return;}
-  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),address:document.getElementById('f-address').value.trim(),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
+  if(!address){toast('ADDRESS REQUIRED — WE MAIL THE REPORT THERE');document.getElementById('f-address').focus();return;}
+  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),address,source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
   clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-address','f-source']);
   await saveLeads();ptToast(PTS.add,name+' sent to the shopper queue');flyPts(PTS.add);burst(lastTap.x||innerWidth/2,lastTap.y||innerHeight/2,16);checkLevelUp();go('board');
 }
@@ -803,12 +808,13 @@ function openLead(id){
       row('consults','Consults on the calendar');
   })():'')+
   '<label>STAGE</label><select id="m-stage">'+so+'</select>'+
-  '<label>BUSINESS ADDRESS</label><input id="m-address" placeholder="Street, Suite, City, CA" value="'+esc(l.address||'')+'">'+
+  '<label'+(l.address?'':' style="color:var(--lose)"')+'>BUSINESS ADDRESS'+(l.address?'':' — MISSING, NEEDED TO MAIL THE REPORT')+'</label><input id="m-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660" value="'+esc(l.address||'')+'"'+(l.address?'':' style="border-color:var(--lose)"')+'>'+
   '<div class="row2"><div><label>PHONE</label><input id="m-phone" value="'+esc(l.phone||'')+'"></div><div><label>INSTAGRAM</label><input id="m-ig" value="'+esc(l.ig||'')+'"></div></div>'+
   '<label>NOTES</label><textarea id="m-notes" rows="3">'+esc(l.notes)+'</textarea>'+
   '<button class="btn gold" onclick="saveLeadEdit('+l.id+')">SAVE</button>'+
   '<button class="btn ghost" onclick="document.getElementById(\'m-bg\').remove()">CLOSE</button></div>';
   document.body.appendChild(bg);
+  if(!l.address){const ai=document.getElementById('m-address');if(ai)setTimeout(()=>ai.focus(),50);}
 }
 async function toggleProof(id,k){
   const l=leads.find(x=>x.id===id);if(!l)return;
@@ -849,12 +855,14 @@ function viewIntel(){
   let html='<h2>INTEL DATABASE</h2><div class="sub-h">Every secret shop, compiled. Readiness = pain we can prove + ammo + data depth. S-ranks get called first.</div>';
   if(!all.length)return html+'<div class="empty"><span class="px">DATABASE EMPTY</span>Every audit Kon files becomes a record here.<br>SHOP tab feeds the machine.</div>';
   const it=intelStats();
-  html+='<div class="db-sum">RECORDS: <b>'+all.length+'</b> · AVG DM REPLY: <b>'+r1(it.dmAvg)+(it.dmAvg!=null?'H':'')+'</b> · NO TEXT-BACK: <b>'+(it.noText==null?'—':it.noText+'%')+'</b> · AVG IG SILENCE: <b>'+r1(it.igAvg)+(it.igAvg!=null?'D':'')+'</b></div>';
+  const mailable=all.filter(l=>l.address&&l.ammo).length;
+  html+='<div class="db-sum">RECORDS: <b>'+all.length+'</b> · AVG DM REPLY: <b>'+r1(it.dmAvg)+(it.dmAvg!=null?'H':'')+'</b> · NO TEXT-BACK: <b>'+(it.noText==null?'—':it.noText+'%')+'</b> · AVG IG SILENCE: <b>'+r1(it.igAvg)+(it.igAvg!=null?'D':'')+'</b><br>MAIL-READY (ADDRESS + AMMO): <b style="color:'+(mailable?'var(--win)':'var(--lose)')+'">'+mailable+'</b> · NO ADDRESS: <b style="color:var(--lose)">'+all.filter(l=>!l.address).length+'</b> · NO AMMO: <b style="color:var(--lose)">'+all.filter(l=>!l.ammo).length+'</b></div>';
   const sorts=[['rd','HOTTEST'],['dm','DM PAIN'],['rev','FEWEST REVIEWS'],['ig','IG SILENCE'],['new','NEWEST']];
-  const filters=[['all','ALL'],['full','5/5 DONE'],['part','PARTIAL'],['hot','S+A ONLY']];
+  const filters=[['all','ALL'],['mail','MAIL-READY'],['full','5/5 DONE'],['part','PARTIAL'],['hot','S+A ONLY']];
   html+='<div class="chips">'+sorts.map(s=>'<div class="chip'+(dbSort===s[0]?' on':'')+'" onclick="dbSort=\''+s[0]+'\';render()">SORT: '+s[1]+'</div>').join('')+'</div>';
   html+='<div class="chips">'+filters.map(f=>'<div class="chip'+(dbFilter===f[0]?' on':'')+'" onclick="dbFilter=\''+f[0]+'\';render()">'+f[1]+'</div>').join('')+'</div>';
   let list=all.slice();
+  if(dbFilter==='mail')list=list.filter(l=>l.address&&l.ammo);
   if(dbFilter==='full')list=list.filter(l=>auditCount(l)===5);
   if(dbFilter==='part')list=list.filter(l=>auditCount(l)<5);
   if(dbFilter==='hot')list=list.filter(l=>readiness(l)>=70);
@@ -893,8 +901,8 @@ function exportIntel(){
   const A=leads.filter(l=>auditCount(l)>0).sort((a,b)=>readiness(b)-readiness(a));
   if(!A.length){toast('DATABASE EMPTY');return;}
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const rows=[['Name','Address','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
-  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
+  const rows=[['Name','Address','Mail-ready','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
+  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',(l.address&&l.ammo)?'YES':(l.address?'NO AMMO':'NO ADDRESS'),l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' RECORDS COPIED — PASTE INTO SHEETS');},()=>prompt('Copy this CSV:',csv));
   else prompt('Copy this CSV:',csv);
