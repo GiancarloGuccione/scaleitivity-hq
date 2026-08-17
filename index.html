@@ -251,6 +251,21 @@ body.gaming .logo{animation:none}
 .src-row{display:grid;grid-template-columns:1fr 70px 70px;padding:11px 12px;border-bottom:2px solid #0A0716;font-size:13.5px;font-weight:700;align-items:center}
 .src-row:last-child{border-bottom:none}
 .src-row .h{font-family:'Press Start 2P';font-size:6.5px;color:var(--dim);font-weight:400}
+/* ============ INTEL DATABASE ============ */
+.db-sum{font-family:'Press Start 2P';font-size:6.5px;color:var(--dim);line-height:2.2;border:2px solid var(--line);background:#0A0716;padding:10px 12px;margin-bottom:12px}
+.db-sum b{color:var(--gold);font-weight:400}
+.db-card{background:var(--panel);border:2px solid var(--line);margin-bottom:12px;overflow:hidden}
+.db-head{display:flex;align-items:center;gap:9px;padding:11px 12px;border-bottom:2px solid #0A0716;background:var(--panel-hi)}
+.db-id{font-family:'Press Start 2P';font-size:6px;color:var(--dim);flex:0 0 auto}
+.db-head .nm{font-weight:800;font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-badge{font-family:'Press Start 2P';font-size:8px;padding:5px 8px;border:2px solid;margin-left:auto;white-space:nowrap;flex:0 0 auto}
+.rd-mini{font-family:'Press Start 2P';font-size:6.5px;padding:4px 7px;border:2px solid;display:inline-block;margin-top:8px}
+.db-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:#0A0716;padding:2px}
+.db-cell{background:var(--panel);padding:9px 11px;min-width:0}
+.db-k{display:block;font-family:'Press Start 2P';font-size:5.5px;color:var(--dim);margin-bottom:5px;letter-spacing:.05em}
+.db-v{font-size:13px;font-weight:800;line-height:1.35;word-break:break-word}
+.db-ammo{padding:9px 12px;font-size:12.5px;color:var(--gold);background:#0A0716;border-top:2px solid #0A0716}
+.db-foot{padding:9px 12px;font-size:11px;color:var(--dim);border-top:2px solid #0A0716}
 </style>
 </head>
 <body>
@@ -275,6 +290,7 @@ body.gaming .logo{animation:none}
     <button class="nav-btn" data-t="hunt" onclick="go('hunt')"><span class="ico">＋</span>HUNT</button>
     <button class="nav-btn" data-t="shop" onclick="go('shop')"><span class="ico">◉</span>SHOP</button>
     <button class="nav-btn" data-t="close" onclick="go('close')"><span class="ico">✦</span>CLOSE</button>
+    <button class="nav-btn" data-t="intel" onclick="go('intel')"><span class="ico">▤</span>INTEL</button>
     <button class="nav-btn" data-t="score" onclick="go('score')"><span class="ico">▲</span>SCORE</button>
     <button class="nav-btn" data-t="game" onclick="go('game')"><span class="ico">◓</span>BREAK</button>
   </div></nav>
@@ -501,6 +517,7 @@ function render(){
   if(tab==='hunt')m.innerHTML=viewHunt();
   if(tab==='shop')m.innerHTML=viewShop();
   if(tab==='close')m.innerHTML=viewClose();
+  if(tab==='intel')m.innerHTML=viewIntel();
   if(tab==='score')m.innerHTML=viewScore();
   restoreDrafts();
 }
@@ -605,6 +622,7 @@ function closeCard(l,btns){
   return '<div class="big"'+(od?' style="border-color:var(--lose);box-shadow:0 0 16px rgba(255,107,107,.25)"':'')+'>'+
   (od?'<span class="overdue-pill">! OVERDUE · '+esc(l.nextTouch)+'</span>':'')+
   '<div class="nm">'+esc(l.name)+'</div>'+
+  '<div>'+rdBadge(l,true)+'</div>'+
   (l.ammo?'<div class="am">\u201c'+esc(l.ammo)+'\u201d</div>':'')+
   '<div class="contact">'+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> · ':'')+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> · ':'')+esc(l.city)+
   ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+'</div>'+
@@ -612,7 +630,7 @@ function closeCard(l,btns){
   '<div class="act-row"><button class="btn ghost" style="margin-top:0" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" style="margin-top:0" onclick="setTouch('+l.id+')">FOLLOW-UP</button></div></div>';
 }
 function viewClose(){
-  const sortF=(a,b)=>(isOverdue(b)-isOverdue(a))||a.stage-b.stage;
+  const sortF=(a,b)=>(isOverdue(b)-isOverdue(a))||(readiness(b)-readiness(a))||a.stage-b.stage;
   const ready=leads.filter(l=>l.stage===3||l.stage===4).sort(sortF);
   const booked=leads.filter(l=>l.stage===5).sort(sortF);
   let html='<h2>THE CLOSE</h2><div class="sub-h">P1 Giancarlo only. Call the green stack, open with the ammo line, book the Zoom. MEETING +'+PTS.meeting+' · WON +'+PTS.won+'.</div>';
@@ -776,6 +794,85 @@ async function toggleProof(id,k){
   else sfx.pt();
 }
 async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);l.stage=parseInt(document.getElementById('m-stage').value);l.notes=document.getElementById('m-notes').value;document.getElementById('m-bg').remove();await saveLeads();render();}
+
+/* ============ READINESS SCORE (who to call first) ============ */
+function numOf(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+function readiness(l){
+  const a=l.audit||{};let s=0;
+  const dm=numOf(a.a1hrs);if(dm!=null)s+=dm>=24?25:dm>=12?18:dm>=6?10:4;
+  const t=(a.a2text||'').toString().trim().toLowerCase();
+  if(t.startsWith('n'))s+=15;else if(t.startsWith('y'))s+=3;
+  const fm=numOf(a.a3hrs);if(fm!=null)s+=fm>=24?15:fm>=12?10:4;
+  const ig=numOf(a.a5days);if(ig!=null)s+=ig>=30?10:ig>=14?7:2;
+  const rv=numOf(a.a4count);if(rv!=null)s+=rv<50?10:rv<=150?6:3;
+  const st=numOf(a.a4stars);if(st!=null&&st<4.3)s+=5;
+  if(l.ammo)s+=10;
+  s+=auditCount(l)*2;
+  if(l.phone)s+=3;if(l.ig)s+=2;
+  return Math.min(100,s);
+}
+function rdRank(s){return s>=85?['S','#FFD34D']:s>=70?['A','#6DFF8F']:s>=55?['B','#4DE3FF']:s>=40?['C','#FF5FA2']:['D','#8F84B8'];}
+function rdBadge(l,mini){
+  const s=readiness(l),[g,c]=rdRank(s);
+  return '<span class="'+(mini?'rd-mini':'rd-badge')+'" style="border-color:'+c+';color:'+c+'">'+s+' · '+g+'</span>';
+}
+
+/* ============ INTEL DATABASE ============ */
+let dbSort='rd',dbFilter='all';
+function viewIntel(){
+  const all=leads.filter(l=>auditCount(l)>0);
+  let html='<h2>INTEL DATABASE</h2><div class="sub-h">Every secret shop, compiled. Readiness = pain we can prove + ammo + data depth. S-ranks get called first.</div>';
+  if(!all.length)return html+'<div class="empty"><span class="px">DATABASE EMPTY</span>Every audit Kon files becomes a record here.<br>SHOP tab feeds the machine.</div>';
+  const it=intelStats();
+  html+='<div class="db-sum">RECORDS: <b>'+all.length+'</b> · AVG DM REPLY: <b>'+r1(it.dmAvg)+(it.dmAvg!=null?'H':'')+'</b> · NO TEXT-BACK: <b>'+(it.noText==null?'—':it.noText+'%')+'</b> · AVG IG SILENCE: <b>'+r1(it.igAvg)+(it.igAvg!=null?'D':'')+'</b></div>';
+  const sorts=[['rd','HOTTEST'],['dm','DM PAIN'],['rev','FEWEST REVIEWS'],['ig','IG SILENCE'],['new','NEWEST']];
+  const filters=[['all','ALL'],['full','5/5 DONE'],['part','PARTIAL'],['hot','S+A ONLY']];
+  html+='<div class="chips">'+sorts.map(s=>'<div class="chip'+(dbSort===s[0]?' on':'')+'" onclick="dbSort=\''+s[0]+'\';render()">SORT: '+s[1]+'</div>').join('')+'</div>';
+  html+='<div class="chips">'+filters.map(f=>'<div class="chip'+(dbFilter===f[0]?' on':'')+'" onclick="dbFilter=\''+f[0]+'\';render()">'+f[1]+'</div>').join('')+'</div>';
+  let list=all.slice();
+  if(dbFilter==='full')list=list.filter(l=>auditCount(l)===5);
+  if(dbFilter==='part')list=list.filter(l=>auditCount(l)<5);
+  if(dbFilter==='hot')list=list.filter(l=>readiness(l)>=70);
+  const nl=(v,d)=>v==null?(d?-1:1e9):v;
+  if(dbSort==='rd')list.sort((a,b)=>readiness(b)-readiness(a));
+  if(dbSort==='dm')list.sort((a,b)=>nl(numOf(b.audit.a1hrs),true)-nl(numOf(a.audit.a1hrs),true));
+  if(dbSort==='rev')list.sort((a,b)=>nl(numOf(a.audit.a4count))-nl(numOf(b.audit.a4count)));
+  if(dbSort==='ig')list.sort((a,b)=>nl(numOf(b.audit.a5days),true)-nl(numOf(a.audit.a5days),true));
+  if(dbSort==='new')list.sort((a,b)=>(b.auditedAt||b.addedAt||'').localeCompare(a.auditedAt||a.addedAt||''));
+  if(!list.length)html+='<div class="empty">No records match this filter.</div>';
+  const sev=(n,hi,mid)=>n==null?'var(--dim)':n>=hi?'var(--lose)':n>=mid?'var(--gold)':'var(--txt)';
+  list.forEach((l,i)=>{
+    const a=l.audit,dm=numOf(a.a1hrs),fm=numOf(a.a3hrs),ig=numOf(a.a5days),rv=numOf(a.a4count);
+    const t=(a.a2text||'').toString().trim(),tn=t.toLowerCase().startsWith('n');
+    const cell=(k,v,c)=>'<div class="db-cell"><span class="db-k">'+k+'</span><span class="db-v" style="color:'+c+'">'+(v?esc(v):'—')+'</span></div>';
+    html+='<div class="db-card">'+
+    '<div class="db-head"><span class="db-id">#'+String(i+1).padStart(3,'0')+'</span><span class="nm">'+esc(l.name)+'</span>'+rdBadge(l)+'</div>'+
+    '<div class="db-grid">'+
+    cell('DM REPLY (HRS)',a.a1hrs,sev(dm,24,12))+
+    cell('MISSED-CALL TEXT',a.a2text,tn?'var(--lose)':'var(--txt)')+
+    cell('WEB FORM (HRS)',a.a3hrs,sev(fm,24,12))+
+    cell('REVIEWS · STARS',(a.a4count?a.a4count:'—')+(a.a4stars?' · '+a.a4stars+'★':''),rv!=null&&rv<50?'var(--lose)':'var(--txt)')+
+    cell('IG SILENCE (DAYS)',a.a5days,sev(ig,30,14))+
+    cell('STAGE · AUDIT',STAGES[l.stage].n+' · '+auditCount(l)+'/5','var(--txt)')+
+    '</div>'+
+    (l.ammo?'<div class="db-ammo">▶ '+esc(l.ammo)+'</div>':'')+
+    '<div class="db-foot">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+' · scout '+esc(l.addedBy)+(l.auditedBy?' · shopper '+esc(l.auditedBy):'')+(l.auditedAt?' · '+esc(l.auditedAt):'')+'</div>'+
+    '</div>';
+  });
+  html+='<button class="btn gold" onclick="exportIntel()">⬇ EXPORT DATABASE (CSV FOR SHEETS)</button>'+
+  '<button class="btn ghost" onclick="copyIntel()">COPY PITCH STAT LINE</button>';
+  return html;
+}
+function exportIntel(){
+  const A=leads.filter(l=>auditCount(l)>0).sort((a,b)=>readiness(b)-readiness(a));
+  if(!A.length){toast('DATABASE EMPTY');return;}
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['Name','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
+  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
+  const csv=rows.map(r=>r.map(q).join(',')).join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' RECORDS COPIED — PASTE INTO SHEETS');},()=>prompt('Copy this CSV:',csv));
+  else prompt('Copy this CSV:',csv);
+}
 
 /* ============ BREAK ROOM: DOUBLES PONG (Supabase Realtime, live 2v2) ============ */
 const PW=480,PH=300,PAD_W=10,BALL=10;
