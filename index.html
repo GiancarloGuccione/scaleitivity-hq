@@ -557,6 +557,7 @@ function viewHunt(){
   '<label>SPA NAME *</label><input id="f-name" placeholder="Glow Aesthetics">'+
   '<div class="row2"><div><label>CITY *</label><input id="f-city" placeholder="Newport Beach"></div><div><label>OWNER</label><input id="f-owner" placeholder="Dr. Sarah Kim"></div></div>'+
   '<div class="row2"><div><label>PHONE</label><input id="f-phone" placeholder="949 555 0142"></div><div><label>INSTAGRAM</label><input id="f-ig" placeholder="@glowaesthetics"></div></div>'+
+  '<label>BUSINESS ADDRESS</label><input id="f-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA">'+
   '<label>SOURCE</label><input id="f-source" placeholder="IG hashtag, drove past, referral...">'+
   '<button class="btn gold" onclick="addLead()">DROP ON BOARD · +'+PTS.add+'</button>';
 }
@@ -565,25 +566,37 @@ async function addLead(){
   const name=document.getElementById('f-name').value.trim();
   const city=document.getElementById('f-city').value.trim();
   if(!name||!city){toast('NAME + CITY REQUIRED');return;}
-  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
-  clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-source']);
+  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),address:document.getElementById('f-address').value.trim(),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
+  clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-address','f-source']);
   await saveLeads();ptToast(PTS.add,name+' sent to the shopper queue');flyPts(PTS.add);burst(lastTap.x||innerWidth/2,lastTap.y||innerHeight/2,16);checkLevelUp();go('board');
 }
 
 /* ---- SHOP ---- */
 function viewShop(){
   const q=leads.filter(l=>l.stage===1||l.stage===2||(l.stage===3&&auditCount(l)<5));
-  if(shopId&&!q.find(l=>l.id===shopId))shopId=null;
+  const done=leads.filter(l=>auditCount(l)>0&&!q.includes(l)).sort((a,b)=>(b.auditedAt||'').localeCompare(a.auditedAt||''));
+  if(shopId&&!leads.find(l=>l.id===shopId))shopId=null;
   let html='<h2>SECRET SHOPPER</h2><div class="sub-h">P3 Kon + P4 Fein. Fire Day 0 tests the night the lead lands (DM + form + desk checks), call Day 1, clocks expire Day 2, flip it green. Full run = +'+(PTS.test*5+PTS.ready)+' pts.</div>';
-  if(!q.length)return html+'<div class="empty"><span class="px">QUEUE CLEAR</span>The HUNT tab feeds this one.</div>';
-  if(!shopId)return html+q.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+auditCount(l)+'/5</div></div>'+
+  if(!shopId){
+    if(!q.length)html+='<div class="empty"><span class="px">QUEUE CLEAR</span>The HUNT tab feeds this one.</div>';
+    else html+=q.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+auditCount(l)+'/5</div></div>'+
     '<div class="meta">'+(l.ig?'IG ✓':'<span class="miss">IG —</span>')+' · '+(l.phone?'PHONE ✓':'<span class="miss">PHONE —</span>')+(l.source?' · VIA '+esc(l.source):'')+' · '+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</div>'+
     (c=>c?'<div class="clock '+c.cls+'">'+c.txt+'</div>':'')(auditClock(l))+'</div>').join('');
-  const l=q.find(x=>x.id===shopId);const a=l.audit;const D=v=>v!==''&&v!=null;
-  html+='<div class="card" style="cursor:default"><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div>'+
+    if(done.length){
+      html+='<label>COMPLETED · TAP TO EDIT OR RE-SHOP ('+done.length+')</label>';
+      html+=done.map(l=>'<div class="card" onclick="shopId='+l.id+';sfx.tap();render()"><div class="top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div></div><div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div></div>'+
+      (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
+      '<div class="meta">'+auditCount(l)+'/5 · '+rdBadge(l,true)+(l.auditedAt?' · '+esc(l.auditedAt):'')+' · <b style="color:var(--gold)">EDIT ▸</b></div></div>').join('');
+    }
+    return html;
+  }
+  const l=leads.find(x=>x.id===shopId);const a=l.audit;const D=v=>v!==''&&v!=null;
+  const editing=!q.includes(l);
+  html+='<div class="card" style="cursor:default'+(editing?';border-color:var(--gold)':'')+'">'+(editing?'<div class="clock warn" style="margin:0 0 9px">✎ EDITING A FILED AUDIT · '+STAGES[l.stage].n+' · CHANGES SAVE INSTANTLY</div>':'')+'<div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+'</div>'+
     '<div class="intel-row">'+
     'IG: '+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> — fire the night DM here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
     'PHONE: '+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> — lunch-rush call here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
+    'ADDRESS: '+(l.address?'<a class="clink" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">'+esc(l.address)+'</a>':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
     'SOURCE: '+(l.source?'<b>'+esc(l.source)+'</b>':'<span class="miss">unknown</span>')+
     ' · SCOUTED BY <b>'+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</b>'+(l.addedAt?' · '+esc(l.addedAt):'')+
     (l.notes?'<br>NOTES: '+esc(l.notes):'')+
@@ -595,14 +608,23 @@ function viewShop(){
   html+=test(5,D(a.a5days),'DAY 0 · IG PULSE','Pick the date of their last IG post — days since are computed for the pitch.'+(D(a.a5days)?' Currently: '+esc(a.a5days)+' days.':''),'<input type="date" id="ad-'+l.id+'-a5date" value="'+esc(a.a5date||'')+'" onchange="setAudit('+l.id+',\'a5date\',this.value)">',true);
   const n=auditCount(l);
   html+='<label>AUDIT AMMO \u2014 THEIR WORST NUMBERS, ONE LINE</label><textarea id="ammo-'+l.id+'" rows="2" placeholder="26 hrs to answer a filler DM, no text back, 47 reviews vs competitor 210">'+esc(l.ammo)+'</textarea>'+
-  '<button class="btn mint" '+(n===5?'':'disabled')+' onclick="finishAudit('+l.id+')">'+(n===5?'FLIP TO READY · +'+PTS.ready:'RUN ALL 5 ('+n+'/5)')+'</button>'+
-  (n>0&&n<5?'<button class="btn ghost" onclick="finishAudit('+l.id+',true)">SEND PARTIAL TO CLOSE · '+n+'/5 (NO +'+PTS.ready+' BONUS)</button>':'')+
-  '<button class="btn ghost" onclick="shopId=null;render()">BACK TO QUEUE</button>';
+  (editing
+    ?'<button class="btn gold" onclick="saveAmmoEdit('+l.id+')">SAVE AMMO LINE</button>'+
+     '<button class="btn ghost" onclick="shopId=null;render()">DONE EDITING · BACK</button>'
+    :'<button class="btn mint" '+(n===5?'':'disabled')+' onclick="finishAudit('+l.id+')">'+(n===5?'FLIP TO READY · +'+PTS.ready:'RUN ALL 5 ('+n+'/5)')+'</button>'+
+     (n>0&&n<5?'<button class="btn ghost" onclick="finishAudit('+l.id+',true)">SEND PARTIAL TO CLOSE · '+n+'/5 (NO +'+PTS.ready+' BONUS)</button>':'')+
+     '<button class="btn ghost" onclick="shopId=null;render()">BACK TO QUEUE</button>');
   return html;
 }
 function test(n,done,title,sub,inputs,single){return '<div class="test'+(done?' done':'')+'"><div class="t-head"><div class="badge">'+(done?'✓':n)+'</div>'+title+'<span class="pts">+'+PTS.test+'</span></div><div class="t-sub">'+sub+'</div><div class="t-in'+(single?' single':'')+'">'+inputs+'</div></div>';}
 async function setAudit(id,f,v){if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;l.audit[f]=v;
   if(f==='a5date')l.audit.a5days=v?String(Math.max(0,Math.floor((Date.now()-new Date(v+'T12:00:00').getTime())/86400000))):'';if(!l.auditedBy)l.auditedBy=me;if(l.stage===1)l.stage=2;delete drafts['ad-'+id+'-'+f];sfx.pt();flyPts(PTS.test);await saveLeads();checkLevelUp();render();}
+async function saveAmmoEdit(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const el=document.getElementById('ammo-'+id);if(!el)return;
+  l.ammo=el.value.trim();delete drafts['ammo-'+id];
+  await saveLeads();sfx.ready();toast('AMMO UPDATED');
+}
 async function finishAudit(id,partial){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
   if(!partial&&auditCount(l)!==5)return;
@@ -625,7 +647,8 @@ function closeCard(l,btns){
   '<div>'+rdBadge(l,true)+'</div>'+
   (l.ammo?'<div class="am">\u201c'+esc(l.ammo)+'\u201d</div>':'')+
   '<div class="contact">'+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> · ':'')+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> · ':'')+esc(l.city)+
-  ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+'</div>'+
+  ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+
+  (l.address?'<br>📍 <a class="clink" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">'+esc(l.address)+'</a>':'')+'</div>'+
   '<div class="act-row">'+btns+'</div>'+
   '<div class="act-row"><button class="btn ghost" style="margin-top:0" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" style="margin-top:0" onclick="setTouch('+l.id+')">FOLLOW-UP</button></div></div>';
 }
@@ -780,6 +803,8 @@ function openLead(id){
       row('consults','Consults on the calendar');
   })():'')+
   '<label>STAGE</label><select id="m-stage">'+so+'</select>'+
+  '<label>BUSINESS ADDRESS</label><input id="m-address" placeholder="Street, Suite, City, CA" value="'+esc(l.address||'')+'">'+
+  '<div class="row2"><div><label>PHONE</label><input id="m-phone" value="'+esc(l.phone||'')+'"></div><div><label>INSTAGRAM</label><input id="m-ig" value="'+esc(l.ig||'')+'"></div></div>'+
   '<label>NOTES</label><textarea id="m-notes" rows="3">'+esc(l.notes)+'</textarea>'+
   '<button class="btn gold" onclick="saveLeadEdit('+l.id+')">SAVE</button>'+
   '<button class="btn ghost" onclick="document.getElementById(\'m-bg\').remove()">CLOSE</button></div>';
@@ -793,7 +818,7 @@ async function toggleProof(id,k){
   if(pc===3){sfx.win();celebrate('PROOF LOCKED','DAY 30 DELIVERED · '+esc(l.name).toUpperCase()+' STAYS',true);}
   else sfx.pt();
 }
-async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);l.stage=parseInt(document.getElementById('m-stage').value);l.notes=document.getElementById('m-notes').value;document.getElementById('m-bg').remove();await saveLeads();render();}
+async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);l.stage=parseInt(document.getElementById('m-stage').value);l.notes=document.getElementById('m-notes').value;l.address=document.getElementById('m-address').value.trim();l.phone=document.getElementById('m-phone').value.trim();l.ig=document.getElementById('m-ig').value.trim();document.getElementById('m-bg').remove();await saveLeads();render();}
 
 /* ============ READINESS SCORE (who to call first) ============ */
 function numOf(v){const n=parseFloat(v);return isNaN(n)?null:n;}
@@ -856,7 +881,8 @@ function viewIntel(){
     cell('STAGE · AUDIT',STAGES[l.stage].n+' · '+auditCount(l)+'/5','var(--txt)')+
     '</div>'+
     (l.ammo?'<div class="db-ammo">▶ '+esc(l.ammo)+'</div>':'')+
-    '<div class="db-foot">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+' · scout '+esc(l.addedBy)+(l.auditedBy?' · shopper '+esc(l.auditedBy):'')+(l.auditedAt?' · '+esc(l.auditedAt):'')+'</div>'+
+    '<div class="db-foot">'+(l.address?'📍 '+esc(l.address)+'<br>':'')+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+' · scout '+esc(l.addedBy)+(l.auditedBy?' · shopper '+esc(l.auditedBy):'')+(l.auditedAt?' · '+esc(l.auditedAt):'')+
+    ' · <b style="color:var(--gold);cursor:pointer" onclick="shopId='+l.id+';go(\'shop\')">✎ EDIT AUDIT</b></div>'+
     '</div>';
   });
   html+='<button class="btn gold" onclick="exportIntel()">⬇ EXPORT DATABASE (CSV FOR SHEETS)</button>'+
@@ -867,8 +893,8 @@ function exportIntel(){
   const A=leads.filter(l=>auditCount(l)>0).sort((a,b)=>readiness(b)-readiness(a));
   if(!A.length){toast('DATABASE EMPTY');return;}
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const rows=[['Name','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
-  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
+  const rows=[['Name','Address','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
+  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' RECORDS COPIED — PASTE INTO SHEETS');},()=>prompt('Copy this CSV:',csv));
   else prompt('Copy this CSV:',csv);
