@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SCALEITIVITY ARCADE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 .nav-btn{position:relative}
 .bdg{position:absolute;top:4px;right:14%;background:var(--lose);color:#fff;font-family:'Press Start 2P';font-size:6px;min-width:15px;padding:3px 4px;text-align:center}
@@ -266,6 +267,127 @@ body.gaming .logo{animation:none}
 .db-v{font-size:13px;font-weight:800;line-height:1.35;word-break:break-word}
 .db-ammo{padding:9px 12px;font-size:12.5px;color:var(--gold);background:#0A0716;border-top:2px solid #0A0716}
 .db-foot{padding:9px 12px;font-size:11px;color:var(--dim);border-top:2px solid #0A0716}
+
+/* ============ V9: PATHEOM CRM · ROUTE · DEAL HEAT ============ */
+.st9{color:#141414;background:var(--p2);border-color:var(--p2)}
+.nav-btn{font-size:5.5px}
+.act-row{flex-wrap:wrap}.act-row .btn{flex:1 1 45%}
+.seats{flex-wrap:wrap}
+.seat-row{display:flex;gap:6px;width:100%;align-items:center}
+.seat-row .lb{font-family:'Press Start 2P';font-size:6px;color:var(--dim);width:24px;flex:0 0 auto}
+/* deal heat bar */
+.heat{margin-top:9px}
+.heat .hb{height:10px;background:#0A0716;border:2px solid var(--line);padding:1px}
+.heat .hb i{display:block;height:100%;transition:width .6s steps(12);background:repeating-linear-gradient(90deg,var(--hc,#FFD34D) 0 6px,rgba(0,0,0,.3) 6px 8px)}
+.heat .hl{display:flex;justify-content:space-between;font-family:'Press Start 2P';font-size:6px;color:var(--dim);margin-top:5px}
+.heat .hl b{color:var(--hc,#FFD34D);font-weight:400}
+.heat.big .hb{height:18px}
+.heat.big .hl{font-size:7px}
+.trend-up{color:var(--win)}.trend-dn{color:var(--lose)}
+/* next move card */
+.move{border:2px solid var(--gold);background:linear-gradient(180deg,var(--panel-hi),var(--panel));padding:12px 13px;margin-top:12px;box-shadow:0 0 18px rgba(255,211,77,.15)}
+.move .mv-k{font-family:'Press Start 2P';font-size:6px;color:var(--gold);letter-spacing:.08em;margin-bottom:6px;line-height:1.7}
+.move .mv-t{font-weight:800;font-size:15px;line-height:1.3}
+.move .mv-w{font-size:12.5px;color:var(--dim);margin-top:6px;line-height:1.5}
+.move .mv-s{margin-top:9px;padding:9px 11px;background:#0A0716;border-left:4px solid var(--p2);font-size:12.5px;line-height:1.55;color:var(--txt)}
+.move .mv-p{font-family:'Press Start 2P';font-size:5.5px;color:var(--p3);margin-top:8px;letter-spacing:.05em;line-height:1.8}
+.move .act-row{margin-top:10px}
+.move .act-row .btn{font-size:7px;padding:11px 6px;margin-top:0}
+.mv-inline{margin-top:8px;font-size:12px;color:var(--gold);font-weight:700}
+/* segmented sub-tabs */
+.seg{display:flex;border:2px solid var(--line);margin:4px 0 14px;background:#0A0716}
+.seg div{flex:1;text-align:center;padding:10px 3px;font-family:'Press Start 2P';font-size:5.5px;line-height:1.7;color:var(--dim);cursor:pointer;border-right:2px solid var(--line)}
+.seg div:last-child{border-right:none}
+.seg div.on{background:var(--gold);color:#141414}
+/* crm */
+.crm-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);padding:11px 12px;margin-bottom:8px;cursor:pointer;animation:cardIn .3s both}
+.crm-row .b{flex:1;min-width:0}
+.crm-row .nm{font-weight:800;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-row .sub{font-size:11.5px;color:var(--dim);margin-top:2px}
+.crm-row .heat{margin-top:6px}.crm-row .heat .hb{height:7px}.crm-row .heat .hl{display:none}
+.crm-row .hp{font-family:'Press Start 2P';font-size:9px;min-width:40px;text-align:right}
+.prof-h{background:var(--panel-hi);border:2px solid var(--line);padding:14px;margin-bottom:12px}
+.prof-h .nm{font-weight:800;font-size:19px;line-height:1.2}
+.prof-h .city{color:var(--dim);font-size:12.5px;margin-top:3px}
+.prof-h .row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv .f label{margin:8px 0 4px;font-size:6px}
+.kv .f input,.kv .f select{padding:10px;font-size:14px}
+.kv .f.full{grid-column:1/-1}
+.tl{border-left:2px solid var(--line);margin:8px 0 0 6px;padding-left:14px}
+.tl .ev{position:relative;padding:4px 0 10px;font-size:12.5px;line-height:1.45}
+.tl .ev::before{content:"";position:absolute;left:-19px;top:8px;width:8px;height:8px;background:var(--gold)}
+.tl .ev .t{font-family:'Press Start 2P';font-size:5.5px;color:var(--dim);display:block;margin-bottom:3px}
+.note{background:#0A0716;border:2px solid var(--line);padding:10px 12px;margin-top:8px;font-size:13px;line-height:1.5}
+.note .t{font-family:'Press Start 2P';font-size:5.5px;color:var(--dim);margin-bottom:5px}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.cbtn{display:block;text-align:center;padding:11px 4px;border:2px solid var(--line);background:var(--panel);color:var(--p2);font-family:'Press Start 2P';font-size:6px;text-decoration:none;cursor:pointer}
+.cbtn.off{opacity:.3;pointer-events:none}
+.cbtn.go{background:var(--gold);color:#141414;border-color:var(--gold)}
+.cbtn.pink{color:var(--p3)}
+/* route */
+.rt-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.rt-kpi div{background:var(--panel);border:2px solid var(--line);padding:8px}
+.rt-kpi b{display:block;font-family:'Press Start 2P';font-size:13px;color:var(--txt)}
+.rt-kpi b i{font-style:normal;color:var(--dim);font-size:8px}
+.rt-kpi span{display:block;font-family:'Press Start 2P';font-size:5px;color:var(--dim);margin-top:6px;letter-spacing:.05em}
+.rt-kpi div.hit b{color:var(--gold)}
+#rt-map{height:38vh;min-height:230px;background:#070512;border:3px solid var(--line);position:relative;z-index:1;margin:8px 0 10px}
+.leaflet-container{background:#070512;font-family:'Outfit'}
+.leaflet-control-attribution{background:rgba(7,5,18,.7)!important;color:var(--dim)!important;font-size:8px!important}
+.leaflet-control-attribution a{color:var(--dim)!important}
+.num-pin{width:26px;height:26px;background:var(--gold);color:#141414;font-family:'Press Start 2P';font-size:9px;line-height:26px;text-align:center;border:2px solid #000;box-shadow:0 0 0 2px rgba(255,211,77,.3),0 4px 12px rgba(0,0,0,.7)}
+.num-pin.done{background:var(--win)}.num-pin.no{background:#3A2E63;color:var(--dim)}.num-pin.focus{transform:scale(1.3)}
+.me-pin{width:14px;height:14px;border-radius:50%;background:var(--p2);border:2px solid #000;box-shadow:0 0 0 8px rgba(77,227,255,.18)}
+.rt-stop{display:flex;align-items:center;gap:10px;padding:11px 8px;border-bottom:2px solid #0A0716;cursor:pointer}
+.rt-stop .n{font-family:'Press Start 2P';font-size:12px;color:var(--gold);min-width:28px;text-align:right}
+.rt-stop.talked .n,.rt-stop.booked .n,.rt-stop.ret .n{color:var(--win)}
+.rt-stop.no .n{color:var(--dim);text-decoration:line-through}
+.rt-stop .b{flex:1;min-width:0}
+.rt-stop .nm{font-weight:800;font-size:14.5px}
+.rt-stop.no .nm{color:var(--dim)}
+.rt-stop .meta{font-size:11px;color:var(--dim);margin-top:2px}
+.rt-stop .pill{font-family:'Press Start 2P';font-size:5.5px;padding:4px 7px;border:2px solid var(--line);color:var(--dim);white-space:nowrap}
+.rt-stop.focus{background:rgba(255,211,77,.06);border-left:3px solid var(--gold)}
+.rt-hero{background:linear-gradient(180deg,var(--panel-hi),var(--panel));border:2px solid var(--line);border-top:3px solid var(--gold);padding:14px;margin:10px 0 12px}
+.rt-hero .kick{font-family:'Press Start 2P';font-size:6px;color:var(--gold);margin-bottom:8px;letter-spacing:.06em;line-height:1.7}
+.rt-hero .big-n{font-family:'Press Start 2P';font-size:30px;color:var(--gold);line-height:1}
+.rt-hero .name{display:flex;gap:12px;align-items:flex-start}
+.rt-hero .t{font-weight:800;font-size:19px;line-height:1.15}
+.rt-hero .t small{display:block;font-weight:400;font-size:12.5px;color:var(--dim);margin-top:4px}
+.facts{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:5px;font-size:13px;line-height:1.4}
+.facts li b{color:var(--dim);font-weight:700;font-size:11px}
+.odds{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:6px;margin-top:12px}
+.odds div{background:#0A0716;border:2px solid var(--line);padding:9px 10px}
+.odds b{display:block;font-family:'Press Start 2P';font-size:11px}
+.odds span{display:block;font-family:'Press Start 2P';font-size:5px;color:var(--dim);margin-top:5px}
+.angle{margin-top:12px;padding:10px 12px;background:rgba(255,211,77,.07);border-left:4px solid var(--gold);font-size:13.5px;line-height:1.4;cursor:pointer}
+.nb{margin-top:10px;font-size:12.5px;line-height:1.4;padding:9px 12px;background:#0A0716;border:2px dashed var(--line)}
+.script{border:2px solid var(--line);background:#0A0716;margin-top:10px}
+.script summary{cursor:pointer;padding:10px 12px;font-family:'Press Start 2P';font-size:6.5px;color:var(--gold);list-style:none}
+.script summary::-webkit-details-marker{display:none}
+.script summary::before{content:"▸ "}.script[open] summary::before{content:"▾ "}
+.script .scr{padding:0 14px 12px;font-size:13.5px;line-height:1.55}
+.script .scr p{margin:0 0 9px}.script .scr b{color:var(--gold)}
+.status{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px}
+.status button{padding:11px 2px;border:2px solid var(--line);background:#0A0716;color:var(--dim);font-family:'Press Start 2P';font-size:5.5px;cursor:pointer}
+.status button.on-pending{background:var(--panel-hi);color:var(--txt)}
+.status button.on-talked{background:var(--win);color:#0B2E18;border-color:var(--win)}
+.status button.on-booked{background:var(--gold);color:#141414;border-color:var(--gold)}
+.status button.on-no{background:#3A2E63;color:var(--txt)}
+.status button.on-ret{background:var(--p3);color:#141414;border-color:var(--p3)}
+.rt-row{display:flex;gap:6px;margin-top:10px}
+.rt-row .cbtn{flex:1}
+.cb-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:2px solid #0A0716;font-size:13px}
+.cb-row .b{flex:1;min-width:0}.cb-row b{display:block}.cb-row span{color:var(--dim);font-size:12px}
+.cb-row a{font-family:'Press Start 2P';font-size:6px;padding:7px 9px;border:2px solid var(--line);color:var(--gold);text-decoration:none;white-space:nowrap}
+.pool{font-family:'Press Start 2P';font-size:6.5px;color:var(--dim);line-height:2.2;border:2px solid var(--line);background:#0A0716;padding:10px 12px;margin-top:12px}
+.pool b{color:var(--gold);font-weight:400}
+.pool .bad{color:var(--lose)}
+.dupe{background:var(--panel);border:2px solid var(--lose);padding:12px;margin-bottom:10px}
+.dupe .why{font-family:'Press Start 2P';font-size:6px;color:var(--lose);margin-bottom:8px}
+.lock{border:2px dashed var(--line);padding:16px;text-align:center;color:var(--dim);font-size:12.5px;line-height:1.7;margin-top:10px}
+.lock .px{display:block;font-size:8px;color:var(--gold);margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -290,7 +412,8 @@ body.gaming .logo{animation:none}
     <button class="nav-btn" data-t="hunt" onclick="go('hunt')"><span class="ico">＋</span>HUNT</button>
     <button class="nav-btn" data-t="shop" onclick="go('shop')"><span class="ico">◉</span>SHOP</button>
     <button class="nav-btn" data-t="close" onclick="go('close')"><span class="ico">✦</span>CLOSE</button>
-    <button class="nav-btn" data-t="intel" onclick="go('intel')"><span class="ico">▤</span>INTEL</button>
+    <button class="nav-btn" data-t="route" onclick="go('route')"><span class="ico">⌖</span>ROUTE</button>
+    <button class="nav-btn" data-t="crm" onclick="go('crm')"><span class="ico">◈</span>CRM</button>
     <button class="nav-btn" data-t="score" onclick="go('score')"><span class="ico">▲</span>SCORE</button>
     <button class="nav-btn" data-t="game" onclick="go('game')"><span class="ico">◓</span>BREAK</button>
   </div></nav>
@@ -298,6 +421,7 @@ body.gaming .logo{animation:none}
 <div id="toast"></div><div id="flash"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ============ CONFIG ============ */
 const KEY='scaleitivity-leads-v2';
@@ -311,10 +435,24 @@ const P={
   Fein:{n:'P4',c:'var(--p4)',hex:'#6DFF8F',lane:'FLEX · leads + audits'}
 };
 const FOUNDERS=Object.keys(P);
-const STAGES={1:{n:'NEW',c:'st1'},2:{n:'AUDITING',c:'st2'},3:{n:'READY',c:'st3'},4:{n:'CONTACTED',c:'st4'},5:{n:'MEETING',c:'st5'},6:{n:'WON',c:'st6'},7:{n:'LOST',c:'st7'},8:{n:'NURTURE',c:'st8'}};
-const PTS={add:5,test:3,ready:10,meeting:25,won:100,dial:1,scout:10};
+const STAGES={1:{n:'NEW',c:'st1'},2:{n:'AUDITING',c:'st2'},3:{n:'READY',c:'st3'},4:{n:'CONTACTED',c:'st4'},5:{n:'MEETING',c:'st5'},9:{n:'PILOT',c:'st9'},6:{n:'SIGNED',c:'st6'},7:{n:'LOST',c:'st7'},8:{n:'NURTURE',c:'st8'}};
+const STAGE_ORDER=[1,2,3,4,5,9,6,7,8];
+const stageOrder=l=>STAGE_ORDER.indexOf(l.stage);
+const PTS={add:5,test:3,ready:10,meeting:25,won:100,dial:1,scout:10,door:3,talk:5,pilot:40};
 const LEVELS=[[0,'ROOKIE'],[50,'HUSTLER'],[120,'OPERATOR'],[250,'CLOSER'],[450,'RAINMAKER'],[700,'MOGUL'],[1000,'EMPIRE']];
-let leads=[],me=null,tab='board',filter=0,shopId=null;
+/* PATHEOM offer */
+const OFFER={machine:3500,engine:6000,founding:2000,setup:1500,addLocShared:2000,addLocOwn:3500,pilotDays:30,seatsPerCity:3};
+/* door routes */
+const ROUTES_KEY='scaleitivity-routes-v1';
+const QUOTA={Giancarlo:{n:25,t:'CHI',pref:'burbs',lbl:'CHI SUBURBS'},Kon:{n:25,t:'CHI',pref:'burbs',lbl:'CHI SUBURBS'},Chandler:{n:7,t:'CHI',pref:'city',lbl:'CHICAGO'},Fein:{n:15,t:'LA',pref:'any',lbl:'LA AREA'}};
+const QUALIFY_MIN=1000000,REV_PER_REVIEW=10000;
+const CHI_CITIES=['chicago','naperville','schaumburg','oak brook','oakbrook','hinsdale','evanston','wilmette','northbrook','glenview','arlington heights','downers grove','orland park','elmhurst','lombard','wheaton','barrington','highland park','skokie','park ridge','des plaines','oak park','burr ridge','western springs','la grange','buffalo grove','deerfield','libertyville','vernon hills','geneva','st. charles','st charles','bolingbrook','plainfield','joliet','tinley park','frankfort','mokena','new lenox','homer glen','lemont','willowbrook','westmont','clarendon hills','glen ellyn','winnetka','kenilworth','lincolnshire','long grove','inverness','palatine','hoffman estates','elk grove','mount prospect','wheeling','prospect heights','niles','morton grove','lincolnwood','lisle','warrenville','batavia','elgin','crystal lake','algonquin','lake zurich','mundelein','gurnee','glencoe','river forest','elmwood park','berwyn','oak lawn','evergreen park','palos','naperville','hinsdale'];
+const LA_CITIES=['los angeles','newport beach','irvine','costa mesa','torrance','anaheim','tustin','santa ana','huntington beach','laguna','mission viejo','long beach','pasadena','burbank','glendale','sherman oaks','studio city','encino','woodland hills','calabasas','beverly hills','santa monica','west hollywood','culver city','manhattan beach','redondo beach','hermosa beach','fullerton','brea','yorba linda','aliso viejo','dana point','san clemente','san juan capistrano','rancho santa margarita','fountain valley','garden grove','cypress','seal beach','la habra','placentia','corona del mar','tarzana','toluca lake','marina del rey','venice','malibu','thousand oaks','westlake village','orange'];
+const DOOR_LABEL={pending:'NOT YET',talked:'TALKED',booked:'BOOKED',ret:'RETURN',no:'NO'};
+const PROOF=[['filmed','Filmed week one (60-min filming day done)'],['posts','Posts live — 3 a week, in their voice'],['inbox','Inbox answered in under 60 seconds'],['consults','Consults booked by the machine']];
+let leads=[],me=null,tab='board',filter=0,shopId=null,leadsLoaded=false;
+let routes={week:'',assign:{},settings:{}};
+let crmView='profiles',crmId=null,crmQ='',routeUser=null,routeFocus=null,rtMap=null,rtMarkers={},rtLine=null,geoBusy=false;
 let lastTap={x:null,y:null},myPts=null;
 
 /* ============ DRAFT KEEPER (fix: sync re-render was wiping typed input) ============ */
@@ -350,8 +488,17 @@ const sfx={
 };
 
 /* ============ STORAGE ============ */
-async function loadLeads(){try{const res=await fetch(SUPABASE_URL+'/rest/v1/kv?key=eq.'+encodeURIComponent(KEY)+'&select=value',{headers:SB_HEADERS});if(!res.ok)throw 0;const rows=await res.json();leads=rows.length?JSON.parse(rows[0].value):[];}catch(e){/* keep current leads on transient fetch failure */}}
-async function saveLeads(){try{const res=await fetch(SUPABASE_URL+'/rest/v1/kv',{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates'},SB_HEADERS),body:JSON.stringify({key:KEY,value:JSON.stringify(leads)})});if(!res.ok)throw 0;}catch(e){toast('SAVE FAILED');}}
+async function kvGet(k){const res=await fetch(SUPABASE_URL+'/rest/v1/kv?key=eq.'+encodeURIComponent(k)+'&select=value',{headers:SB_HEADERS});if(!res.ok)throw 0;const rows=await res.json();return rows.length?JSON.parse(rows[0].value):null;}
+async function kvSet(k,v){const res=await fetch(SUPABASE_URL+'/rest/v1/kv',{method:'POST',headers:Object.assign({'Prefer':'resolution=merge-duplicates'},SB_HEADERS),body:JSON.stringify({key:k,value:JSON.stringify(v)})});if(!res.ok)throw 0;}
+async function loadLeads(){
+  try{const v=await kvGet(KEY);leads=v||[];leadsLoaded=true;}catch(e){/* keep current leads on transient fetch failure */}
+  try{const r=await kvGet(ROUTES_KEY);if(r)routes=Object.assign({week:'',assign:{},settings:{}},r);}catch(e){}
+}
+async function saveLeads(){
+  leads.forEach(l=>{const h=heat(l);if(l.heatLast!==h){l.heatPrev=l.heatLast==null?h:l.heatLast;l.heatLast=h;}});
+  try{await kvSet(KEY,leads);}catch(e){toast('SAVE FAILED');}
+}
+async function saveRoutes(){try{await kvSet(ROUTES_KEY,routes);}catch(e){toast('ROUTE SAVE FAILED');}}
 async function loadMe(){try{me=localStorage.getItem('scaleitivity-me')||null;}catch(e){me=null;}paintMe();}
 function paintMe(){
   const d=document.getElementById('me-dot');
@@ -425,8 +572,10 @@ function nextLevel(p){for(const lv of LEVELS){if(p<lv[0])return lv;}return null;
 /* ============ SCORING ============ */
 function daysAgo(d){if(!d)return 999;return Math.floor((Date.now()-new Date(d).getTime())/86400000);}
 function score(){
-  const s={};FOUNDERS.forEach(f=>s[f]={pts:0,leads:0,audits:0,meetings:0,wins:0,dials:0,wk:0});
+  const s={};FOUNDERS.forEach(f=>s[f]={pts:0,leads:0,audits:0,meetings:0,wins:0,dials:0,wk:0,doors:0,talks:0,pilots:0});
   leads.forEach(l=>{
+    (l.doors||[]).forEach(d=>{if(!s[d.by]||d.outcome==='pending')return;s[d.by].pts+=PTS.door;s[d.by].doors++;if(['talked','booked','ret'].includes(d.outcome)){s[d.by].pts+=PTS.talk;s[d.by].talks++;}if((Date.now()-d.at)<7*86400000)s[d.by].wk+=1;});
+    if(l.pilotBy&&s[l.pilotBy]&&(l.stage===9||l.stage===6)){s[l.pilotBy].pts+=PTS.pilot;s[l.pilotBy].pilots++;}
     if(s[l.addedBy]){s[l.addedBy].pts+=PTS.add;s[l.addedBy].leads++;if(daysAgo(l.addedAt)<7)s[l.addedBy].wk+=1;}
     const ac=auditCount(l);
     if(l.auditedBy&&s[l.auditedBy]){
@@ -469,7 +618,7 @@ function copyIntel(){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(line).then(()=>{sfx.ready();toast('PITCH LINE COPIED');},()=>prompt('Copy this:',line));
   else prompt('Copy this:',line);
 }
-function isOverdue(l){return l.nextTouch&&(l.stage===3||l.stage===4||l.stage===5||l.stage===8)&&new Date(l.nextTouch)<new Date(new Date().toDateString());}
+function isOverdue(l){return l.nextTouch&&(l.stage===3||l.stage===4||l.stage===5||l.stage===8||l.stage===9)&&new Date(l.nextTouch)<new Date(new Date().toDateString());}
 
 /* ============ AUDIT CLOCK (Day 0 fire / Day 1 call / Day 2 flip) ============ */
 function leadTs(l){return l.ts||(l.addedAt?new Date(l.addedAt+'T00:00:00').getTime():0);}
@@ -491,24 +640,27 @@ function sourceStats(){
 /* ============ GATE ============ */
 function paintBadges(){
   const shopQ=leads.filter(l=>l.stage===1||l.stage===2||(l.stage===3&&auditCount(l)<5)).length;
-  const closeQ=leads.filter(l=>l.stage===3||l.stage===4||l.stage===5).length;
+  const closeQ=leads.filter(l=>l.stage===3||l.stage===4||l.stage===5||l.stage===9).length;
   const od=leads.filter(isOverdue).length;
   document.querySelectorAll('.bdg').forEach(b=>b.remove());
   const put=(t,n,cls)=>{if(!n)return;const btn=document.querySelector('.nav-btn[data-t="'+t+'"]');if(!btn)return;const b=document.createElement('span');b.className='bdg '+(cls||'');b.textContent=n;btn.appendChild(b);};
   put('shop',shopQ,'g');put('close',od>0?od:closeQ,od>0?'':'g');
+  if(me&&routes.assign&&routes.assign[me]){const left=routes.assign[me].filter(id=>{const l=leads.find(x=>x.id===id);if(!l)return false;const d=doorThisWeek(l,me);return !d||d.outcome==='pending';}).length;put('route',left,'g');}
+  const dp=dupePairs().length;if(dp)put('crm',dp,'');
 }
 function paintGate(){
   const wins=leads.filter(l=>l.stage===6);
-  const founding=wins.filter(l=>l.result==='Won Founding').length;
-  document.getElementById('seats').innerHTML=[0,1,2].map(i=>'<div class="seat'+(i<founding?' filled':'')+'">'+(i<founding?'CLAIMED':'SEAT '+(i+1))+'</div>').join('');
+  const row=t=>{const f=OFFER.seatsPerCity-seatsLeft(t);return '<div class="seat-row"><span class="lb">'+t+'</span>'+[0,1,2].map(i=>'<div class="seat'+(i<f?' filled':'')+'">'+(i<f?'CLAIMED':'SEAT '+(i+1))+'</div>').join('')+'</div>';};
+  document.getElementById('seats').innerHTML=row('CHI')+row('LA');
   document.getElementById('track-fill').style.width=Math.min(100,(wins.length/20)*100)+'%';
-  document.getElementById('gate-left').textContent=founding>=3?'FOUNDING: SOLD OUT':'FOUNDING SEATS: '+(3-founding);
+  const pilots=leads.filter(l=>l.stage===9).length;
+  document.getElementById('gate-left').textContent='FOUNDING $2K · 3 PER CITY'+(pilots?' · '+pilots+' PILOT'+(pilots===1?'':'S')+' LIVE':'');
   const mrr=wins.reduce((s,l)=>s+(parseFloat(l.mrr)||0),0);
-  document.getElementById('gate-right').textContent=wins.length+'/20 CLIENTS'+(mrr?' · $'+mrr.toLocaleString()+'/MO':'');
+  document.getElementById('gate-right').textContent=wins.length+'/20 SIGNED'+(mrr?' · $'+mrr.toLocaleString()+'/MO':'');
 }
 
 /* ============ RENDER ============ */
-function go(t){sfx.tap();if(tab==='game'&&t!=='game')pongLeave();tab=t;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render();}
+function go(t){sfx.tap();if(tab==='game'&&t!=='game')pongLeave();if(tab==='route'&&t!=='route'&&rtMap){try{rtMap.remove();}catch(e){}rtMap=null;}tab=t;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render();}
 function render(){
   paintGate();paintBadges();
   const m=document.getElementById('main');
@@ -517,20 +669,28 @@ function render(){
   if(tab==='hunt')m.innerHTML=viewHunt();
   if(tab==='shop')m.innerHTML=viewShop();
   if(tab==='close')m.innerHTML=viewClose();
-  if(tab==='intel')m.innerHTML=viewIntel();
+  if(tab==='crm')m.innerHTML=viewCRM();
   if(tab==='score')m.innerHTML=viewScore();
+  if(tab==='route'){
+    m.innerHTML=viewRoute();restoreDrafts();setTimeout(initRouteMap,0);
+    const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000)).length;
+    if(pend&&!geoBusy)geocodePending();
+    return;
+  }
   restoreDrafts();
 }
 
 /* ---- BOARD ---- */
 function viewBoard(){
-  const counts={0:leads.length};for(let s=1;s<=8;s++)counts[s]=leads.filter(l=>l.stage===s).length;
+  const counts={0:leads.length};STAGE_ORDER.forEach(s=>counts[s]=leads.filter(l=>l.stage===s).length);
   let chips='<div class="chips"><div class="chip'+(filter===0?' on':'')+'" onclick="filter=0;render()">ALL<span class="n">'+counts[0]+'</span></div>';
-  for(let s=1;s<=8;s++)chips+='<div class="chip'+(filter===s?' on':'')+'" onclick="filter='+s+';render()">'+STAGES[s].n+'<span class="n">'+counts[s]+'</span></div>';
+  STAGE_ORDER.forEach(s=>{chips+='<div class="chip'+(filter===s?' on':'')+'" onclick="filter='+s+';render()">'+STAGES[s].n+'<span class="n">'+counts[s]+'</span></div>';});
   const noAddr=leads.filter(l=>!l.address).length;
   if(noAddr)chips+='<div class="chip'+(filter==='noaddr'?' on':'')+'" style="border-color:var(--lose);color:'+(filter==='noaddr'?'#141414':'var(--lose)')+'" onclick="filter=\'noaddr\';render()">NO ADDRESS<span class="n">'+noAddr+'</span></div>';
+  const noRev=leads.filter(l=>reviewsOf(l)==null&&l.stage!==7).length;
+  if(noRev)chips+='<div class="chip'+(filter==='norev'?' on':'')+'" style="border-color:var(--p3);color:'+(filter==='norev'?'#141414':'var(--p3)')+'" onclick="filter=\'norev\';render()">NO REVIEWS #<span class="n">'+noRev+'</span></div>';
   chips+='</div>';
-  const list=leads.filter(l=>filter===0||(filter==='noaddr'?!l.address:l.stage===filter)).sort((a,b)=>a.stage-b.stage);
+  const list=leads.filter(l=>filter===0||(filter==='noaddr'?!l.address:filter==='norev'?(reviewsOf(l)==null&&l.stage!==7):l.stage===filter)).sort((a,b)=>stageOrder(a)-stageOrder(b)||heat(b)-heat(a));
   let cards=list.map(cardHTML).join('');
   if(!leads.length)cards='<div class="empty"><span class="px">STAGE EMPTY</span>First blood goes to whoever adds a spa.<br>HUNT tab. Go.</div>';
   else if(!list.length)cards='<div class="empty">Nothing in this stage yet.</div>';
@@ -543,24 +703,25 @@ function cardHTML(l){
   '<div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div></div>'+
   (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
   '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+(l.mrr?' · $'+(+l.mrr).toLocaleString()+'/mo':'')+
-  (l.address?'<br>📍 '+esc(l.address):' · <span class="miss">NO ADDRESS — TAP TO ADD</span>')+'</div>'+
+  (l.address?'<br>📍 '+esc(l.address):' · <span class="miss">NO ADDRESS — TAP TO ADD</span>')+(reviewsOf(l)==null&&l.stage!==7?' · <span class="miss" style="color:var(--p3)">NO REVIEWS # — TAP TO ADD</span>':'')+'</div>'+
+  (l.stage!==6&&l.stage!==7?heatBar(l,false):'')+
   d30Chip(l)+'</div>';
 }
 function d30Chip(l){
-  if(l.stage!==6||!l.closedAt)return '';
-  const pc=['live','revival','consults'].filter(k=>l.proof&&l.proof[k]).length;
-  if(pc===3)return '<div style="margin-top:9px"><span class="d30-chip" style="border-color:var(--win);color:var(--win)">✓ DAY 30 PROOF LOCKED</span></div>';
-  const left=Math.max(0,30-daysAgo(l.closedAt));
-  return '<div style="margin-top:9px"><span class="d30-chip'+(left<=7?' danger':'')+'">D30 PROOF: '+pc+'/3 · '+(left>0?left+' DAYS LEFT':'DUE NOW')+'</span></div>';
+  if(l.stage!==9||!l.pilotAt)return '';
+  const pc=proofCount(l),day=pilotDay(l),left=OFFER.pilotDays-day;
+  if(pc===PROOF.length)return '<div style="margin-top:9px"><span class="d30-chip" style="border-color:var(--win);color:var(--win)">✓ PROOF LOCKED · DAY '+day+'/30 · ASK FOR THE SIGN</span></div>';
+  return '<div style="margin-top:9px"><span class="d30-chip'+(left<=7&&pc<PROOF.length?' danger':'')+'">PILOT DAY '+day+'/30 · PROOF '+pc+'/'+PROOF.length+(left>0?' · '+left+' DAYS LEFT':' · DECISION DUE')+'</span></div>';
 }
 
 /* ---- HUNT ---- */
 function viewHunt(){
-  return '<h2>HUNT</h2><div class="sub-h">P2 Chandler + P4 Fein. Med spas only for now. Every spa on the board feeds the shoppers. +'+PTS.add+' pts each.</div>'+
-  '<label>SPA NAME *</label><input id="f-name" placeholder="Glow Aesthetics">'+
-  '<div class="row2"><div><label>CITY *</label><input id="f-city" placeholder="Newport Beach"></div><div><label>OWNER</label><input id="f-owner" placeholder="Dr. Sarah Kim"></div></div>'+
-  '<div class="row2"><div><label>PHONE</label><input id="f-phone" placeholder="949 555 0142"></div><div><label>INSTAGRAM</label><input id="f-ig" placeholder="@glowaesthetics"></div></div>'+
-  '<label>BUSINESS ADDRESS * (WE MAIL REPORTS HERE)</label><input id="f-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660">'+
+  return '<h2>HUNT</h2><div class="sub-h">P2 Chandler + P4 Fein. Med spas + private practices — Chicago suburbs and LA/OC. Address + Google review count is what puts a spa on a door route (100+ reviews ≈ $1M). Duplicates are blocked on entry. +'+PTS.add+' pts each.</div>'+
+  '<label>PRACTICE NAME *</label><input id="f-name" placeholder="Glow Aesthetics">'+
+  '<div class="row2"><div><label>CITY *</label><input id="f-city" placeholder="Naperville"></div><div><label>OWNER / ASK FOR</label><input id="f-owner" placeholder="Dr. Sarah Kim"></div></div>'+
+  '<div class="row2"><div><label>PHONE</label><input id="f-phone" placeholder="630 555 0142"></div><div><label>INSTAGRAM</label><input id="f-ig" placeholder="@glowaesthetics"></div></div>'+
+  '<label>BUSINESS ADDRESS * (WE MAIL + KNOCK HERE — INCLUDE STATE + ZIP)</label><input id="f-address" placeholder="1200 Route 59, Suite 150, Naperville, IL 60563">'+
+  '<div class="row2"><div><label>EMAIL</label><input id="f-email" type="email" placeholder="hello@glow.com"></div><div><label>GOOGLE REVIEWS #</label><input id="f-reviews" inputmode="numeric" placeholder="214"></div></div>'+
   '<label>SOURCE</label><input id="f-source" placeholder="IG hashtag, drove past, referral...">'+
   '<button class="btn gold" onclick="addLead()">DROP ON BOARD · +'+PTS.add+'</button>';
 }
@@ -571,8 +732,15 @@ async function addLead(){
   const address=document.getElementById('f-address').value.trim();
   if(!name||!city){toast('NAME + CITY REQUIRED');return;}
   if(!address){toast('ADDRESS REQUIRED — WE MAIL THE REPORT THERE');document.getElementById('f-address').focus();return;}
-  leads.push({id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),address,source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:''});
-  clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-address','f-source']);
+  const cand={id:Date.now(),name,city,owner:document.getElementById('f-owner').value.trim(),phone:document.getElementById('f-phone').value.trim(),ig:document.getElementById('f-ig').value.trim(),address,email:document.getElementById('f-email').value.trim(),gReviews:(parseFloat(document.getElementById('f-reviews').value.replace(/[^0-9.]/g,''))||''),source:document.getElementById('f-source').value.trim(),stage:1,addedBy:me,addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:'',log:[]};
+  const dupe=findDupe(cand);
+  if(dupe){
+    if(dupe.r==='SAME NAME'){if(!confirm('A "'+dupe.l.name+'" already exists in '+dupe.l.city+' (scouted by '+dupe.l.addedBy+').\n\nDifferent location? OK to add anyway.'))return;}
+    else{sfx.tap();toast('DUPLICATE · '+dupe.r+' · OPENING THE ORIGINAL');crmId=dupe.l.id;crmView='profiles';setTimeout(()=>go('crm'),600);return;}
+  }
+  cand.log.push({t:Date.now(),by:me,ev:'Scouted onto the board'});
+  leads.push(cand);
+  clearDrafts(['f-name','f-city','f-owner','f-phone','f-ig','f-address','f-email','f-reviews','f-source']);
   await saveLeads();ptToast(PTS.add,name+' sent to the shopper queue');flyPts(PTS.add);burst(lastTap.x||innerWidth/2,lastTap.y||innerHeight/2,16);checkLevelUp();go('board');
 }
 
@@ -637,6 +805,7 @@ async function finishAudit(id,partial){
   if(!l.ammo){toast('AMMO LINE FIRST \u2014 IT IS THE PITCH');return;}
   l.stage=3;l.auditedBy=l.auditedBy||me;l.auditedAt=new Date().toISOString().slice(0,10);
   delete drafts['ammo-'+id];
+  logEv(l,(partial?'Sent to close (partial audit '+auditCount(l)+'/5)':'Audit complete → READY'));
   await saveLeads();sfx.ready();
   if(partial)celebrate('SENT TO CLOSE','PARTIAL AUDIT · FINISH THE 5 FOR +'+PTS.ready);
   else celebrate('READY TO CALL','+'+PTS.ready+' PTS · AMMO LOADED');
@@ -654,23 +823,30 @@ function closeCard(l,btns){
   '<div class="contact">'+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> · ':'')+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> · ':'')+esc(l.city)+
   ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+
   (l.address?'<br>📍 <a class="clink" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">'+esc(l.address)+'</a>':'')+'</div>'+
+  heatBar(l,false)+
+  '<div class="mv-inline" onclick="crmId='+l.id+';crmView=\'profiles\';go(\'crm\')" style="cursor:pointer">▶ NEXT: '+nextMove(l).t+' <span style="color:var(--dim);font-weight:400">· tap for the script</span></div>'+
   '<div class="act-row">'+btns+'</div>'+
-  '<div class="act-row"><button class="btn ghost" style="margin-top:0" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" style="margin-top:0" onclick="setTouch('+l.id+')">FOLLOW-UP</button></div></div>';
+  '<div class="act-row"><button class="btn ghost" style="margin-top:0" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" style="margin-top:0" onclick="setTouch('+l.id+')">FOLLOW-UP</button>'+(l.mailedAt?'':'<button class="btn ghost" style="margin-top:0" onclick="markMailed('+l.id+')">REPORT MAILED</button>')+'</div></div>';
 }
 function viewClose(){
-  const sortF=(a,b)=>(isOverdue(b)-isOverdue(a))||(readiness(b)-readiness(a))||a.stage-b.stage;
+  const sortF=(a,b)=>(isOverdue(b)-isOverdue(a))||(heat(b)-heat(a))||(readiness(b)-readiness(a))||stageOrder(a)-stageOrder(b);
   const ready=leads.filter(l=>l.stage===3||l.stage===4).sort(sortF);
   const booked=leads.filter(l=>l.stage===5).sort(sortF);
-  let html='<h2>THE CLOSE</h2><div class="sub-h">P1 Giancarlo only. Call the green stack, open with the ammo line, book the Zoom. MEETING +'+PTS.meeting+' · WON +'+PTS.won+'.</div>';
+  const pilots=leads.filter(l=>l.stage===9).sort((a,b)=>pilotDay(b)-pilotDay(a));
+  let html='<h2>THE CLOSE</h2><div class="sub-h">P1 Giancarlo. Open with their number, book the 15-min setup call, start the free 30-day pilot, film week one, sign at day 30. SETUP CALL +'+PTS.meeting+' · PILOT +'+PTS.pilot+' · SIGNED +'+PTS.won+'.</div>';
+  if(pilots.length){
+    html+='<label>PILOTS RUNNING · 30 DAYS FREE · DAY 30 THEIR NUMBERS DECIDE</label>';
+    pilots.forEach(l=>{html+=closeCard(l,'<button class="btn mint" onclick="winLead('+l.id+')">SIGNED ★</button><button class="btn gold" onclick="openLead('+l.id+')">PROOF '+proofCount(l)+'/'+PROOF.length+'</button><button class="btn red" onclick="shutOffPilot('+l.id+')">SHUT OFF</button>');});
+  }
   if(booked.length){
-    html+='<label>MEETINGS ON THE CALENDAR</label>';
-    booked.forEach(l=>{html+=closeCard(l,'<button class="btn mint" onclick="winLead('+l.id+')">WON ★</button><button class="btn red" onclick="loseLead('+l.id+')">LOST</button><button class="btn ghost" style="margin-top:0" onclick="noShow('+l.id+')">NO-SHOW</button>');});
+    html+='<label>SETUP CALLS ON THE CALENDAR</label>';
+    booked.forEach(l=>{html+=closeCard(l,'<button class="btn gold" onclick="startPilot('+l.id+')">START PILOT · +'+PTS.pilot+'</button><button class="btn mint" onclick="winLead('+l.id+')">SIGNED ★</button><button class="btn ghost" style="margin-top:0" onclick="noShow('+l.id+')">NO-SHOW</button><button class="btn red" onclick="loseLead('+l.id+')">LOST</button>');});
   }
   if(ready.length){
-    html+='<label>READY TO CALL \u2014 THE GREEN STACK</label>';
-    ready.forEach(l=>{html+=closeCard(l,'<button class="btn gold" onclick="bookMeeting('+l.id+')">BOOK ZOOM · +'+PTS.meeting+'</button>'+(l.stage===3?'<button class="btn ghost" style="margin-top:0" onclick="markContacted('+l.id+')">CONTACTED</button>':''));});
+    html+='<label>READY TO CALL \u2014 HOTTEST FIRST</label>';
+    ready.forEach(l=>{html+=closeCard(l,'<button class="btn gold" onclick="bookMeeting('+l.id+')">BOOK SETUP CALL · +'+PTS.meeting+'</button>'+(l.stage===3?'<button class="btn ghost" style="margin-top:0" onclick="markContacted('+l.id+')">CONTACTED</button>':'<button class="btn ghost" style="margin-top:0" onclick="loseLead('+l.id+')">LOST / NURTURE</button>'));});
   }
-  if(!ready.length&&!booked.length)html+='<div class="empty"><span class="px">NO TARGETS</span>The SHOP tab turns cards green. Green lands here.</div>';
+  if(!ready.length&&!booked.length&&!pilots.length)html+='<div class="empty"><span class="px">NO TARGETS</span>The SHOP tab turns cards green. Green lands here.</div>';
   const due=leads.filter(l=>l.stage===8&&l.nextTouch&&new Date(l.nextTouch)<=new Date());
   if(due.length){
     html+='<label>REVIVE — NURTURE LEADS DUE FOR A TOUCH</label>';
@@ -691,48 +867,50 @@ async function logDial(id){
 async function setTouch(id){
   const l=leads.find(x=>x.id===id);if(!l)return;
   const d=prompt('Follow up when? (YYYY-MM-DD)',new Date(Date.now()+2*86400000).toISOString().slice(0,10));
-  if(!d)return;l.nextTouch=d;await saveLeads();toast('FOLLOW-UP SET');render();
+  if(!d)return;l.nextTouch=d;logEv(l,'Follow-up set for '+d);await saveLeads();toast('FOLLOW-UP SET');render();
 }
-async function markContacted(id){const l=leads.find(x=>x.id===id);l.stage=4;sfx.tap();await saveLeads();render();}
-async function bookMeeting(id){if(needMe())return;const d=prompt('Zoom meeting date and time? (Aug 14, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.bookings=(l.bookings||0)+1;l.nextTouch='';await saveLeads();ptToast(PTS.meeting,'Meeting: '+l.name);celebrate('MEETING BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
+async function markContacted(id){const l=leads.find(x=>x.id===id);if(!l)return;setStage(l,4);sfx.tap();await saveLeads();render();}
+async function bookMeeting(id){if(needMe())return;const d=prompt('Setup call date and time? (Thu, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);if(!l)return;if(l.stage<5||l.stage===8)l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.bookings=(l.bookings||0)+1;l.nextTouch='';logEv(l,'Setup call booked · '+d);await saveLeads();ptToast(PTS.meeting,'Setup call: '+l.name);celebrate('SETUP CALL BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
 function winLead(id){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
-  const founding=leads.filter(x=>x.stage===6&&x.result==='Won Founding').length;
+  const t=territoryOf(l),seats=seatsLeft(t);
   const bg=document.createElement('div');bg.className='modal-bg';bg.id='w-bg';
   bg.onclick=e=>{if(e.target===bg)bg.remove();};
-  const opt=(tier,cls,label,sub,mrr,res)=>'<button class="btn '+cls+'" style="margin-top:10px" onclick="confirmWin('+id+',\''+tier+'\','+mrr+',\''+res+'\')">'+label+'<br><span style="font-size:7px;opacity:.85;font-weight:400">'+sub+'</span></button>';
-  bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+' SIGNED — WHICH DEAL?</h3><div class="m-city">Sizing, never negotiation. Single-provider = bottom of range, multi-room = top.</div>'+
-    (founding<3?opt('Founding','gold','FOUNDING SEAT · $2,000/MO','6-mo lock · $1,500 setup · case-study rights · '+(3-founding)+' seat'+(3-founding>1?'s':'')+' left — dies at client three','2000','Won Founding'):'')+
-    opt('Machine','mint','TIER 1 · THE MACHINE','$2,500–3,000/mo + $3,000 setup','2750','Won Standard')+
-    opt('Engine','mint','TIER 2 · THE ENGINE ★ FLAGSHIP','$4,000–4,500/mo + $4,000 setup','4250','Won Standard')+
-    opt('MarketOwner','mint','TIER 3 · MARKET OWNER','$6,000–7,500/mo + $5,000 setup','6750','Won Standard')+
+  const opt=(tier,cls,label,sub,mrr,res)=>'<button class="btn '+cls+'" style="margin-top:10px" onclick="confirmWin('+id+',\''+tier+'\','+mrr+',\''+res+'\')">'+label+'<br><span style="font-size:7px;opacity:.85;font-weight:400;line-height:1.7">'+sub+'</span></button>';
+  bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+' SIGNED — WHICH DEAL?</h3><div class="m-city">PATHEOM · 6-month agreement after the pilot · $1,500 setup, waived when they sign within 7 days · every message answered in under 60 seconds or that month is free.</div>'+
+    (seats>0?opt('Founding','gold','FOUNDING · $2,000/MO','First three practices in '+(t==='CHI'?'Chicago':t==='LA'?'LA':'each city')+' — case study + 90 seconds of the doctor on camera · '+seats+' seat'+(seats>1?'s':'')+' left · ends at client three','2000','Won Founding'):'<div class="pool" style="margin-top:10px">FOUNDING SEATS IN '+t+': <span class="bad">SOLD OUT</span></div>')+
+    opt('Machine','mint','THE MACHINE · $3,500/MO','Answered · Booked · Posted — 12 videos from one filming day, DMs/texts/missed calls answered in under a minute, dormant patients texted back','3500','Won Standard')+
+    opt('Engine','mint','THE ENGINE · $6,000/MO','Everything in The Machine + 24 videos on two platforms, named offer with ads, quarterly reactivation, rebooking texts, weekly report, 24-hour priority','6000','Won Standard')+
+    '<div class="pool" style="margin-top:10px">EXTRA LOCATIONS: +$2,000/MO SHARED PROVIDERS & CONTENT · +$3,500/MO WITH ITS OWN FILMING DAY — ADD TO THE RETAINER ON THE NEXT SCREEN</div>'+
     '<button class="btn ghost" onclick="document.getElementById(\'w-bg\').remove()">CANCEL</button></div>';
   document.body.appendChild(bg);
 }
 async function confirmWin(id,tier,defMrr,result){
   const l=leads.find(x=>x.id===id);if(!l)return;
-  const v=prompt('Locked monthly retainer for '+l.name+'? ($/mo)',defMrr);
+  const v=prompt('Monthly retainer for '+l.name+' (add extra locations if any)? ($/mo)',defMrr);
   if(v===null)return;
   const el=document.getElementById('w-bg');if(el)el.remove();
   const mrr=parseFloat(v);
   l.stage=6;l.result=result;l.tier=tier;l.mrr=isNaN(mrr)?defMrr:mrr;l.closedBy=me;l.closedAt=new Date().toISOString().slice(0,10);
-  await saveLeads();flash();sfx.win();celebrate('★ CLIENT WON ★','+'+PTS.won+' PTS · '+esc(l.name).toUpperCase()+' · $'+l.mrr.toLocaleString()+'/MO',true);toast('+'+PTS.won+' PTS · '+l.name.toUpperCase()+' IS A CLIENT');checkLevelUp();render();
+  logEv(l,'SIGNED · '+tier+' · $'+l.mrr.toLocaleString()+'/mo');
+  await saveLeads();flash();sfx.win();celebrate('★ SIGNED ★','+'+PTS.won+' PTS · '+esc(l.name).toUpperCase()+' · $'+l.mrr.toLocaleString()+'/MO',true);toast('+'+PTS.won+' PTS · '+l.name.toUpperCase()+' IS A CLIENT');checkLevelUp();render();
 }
-async function loseLead(id){const l=leads.find(x=>x.id===id);const r=prompt('Why? price / noshow / notinterested / nurture','nurture');if(r===null)return;if(r==='nurture'){l.stage=8;l.result='Nurture';l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);toast('NURTURE — AUTO RE-SURFACES IN 30D');}else{l.stage=7;l.result='Lost '+(r||'');}await saveLeads();render();}
+async function loseLead(id){const l=leads.find(x=>x.id===id);if(!l)return;const r=prompt('Why? price / noshow / notinterested / hassomeone / nurture','nurture');if(r===null)return;if(r==='nurture'){l.stage=8;l.result='Nurture';l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);logEv(l,'Moved to nurture · resurfaces in 30d');toast('NURTURE — AUTO RE-SURFACES IN 30D');}else{l.stage=7;l.result='Lost '+(r||'');logEv(l,'Lost · '+(r||''));}await saveLeads();render();}
 async function noShow(id){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
   l.noShows=(l.noShows||0)+1;l.stage=4;l.meetingDate='';
   l.nextTouch=new Date(Date.now()+86400000).toISOString().slice(0,10);
-  await saveLeads();toast('NO-SHOW LOGGED — CHASE + REBOOK');render();
+  logEv(l,'No-show #'+l.noShows+' · rebook');
+  await saveLeads();toast('NO-SHOW LOGGED — HOLD THE SPOT, OFFER TWO TIMES');render();
 }
 async function reviveLead(id){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
-  l.stage=3;l.nextTouch='';
+  l.stage=3;l.nextTouch='';logEv(l,'Revived → READY');
   await saveLeads();sfx.ready();toast(l.name.toUpperCase()+' BACK IN THE GREEN STACK');render();
 }
 async function snoozeLead(id){
   const l=leads.find(x=>x.id===id);if(!l)return;
-  l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);logEv(l,'Snoozed 30 days');
   await saveLeads();toast('SNOOZED 30 DAYS');render();
 }
 
@@ -746,7 +924,7 @@ function viewScore(){
     const lv=levelOf(s[f].pts);const nx=nextLevel(s[f].pts);
     const pct=nx?Math.round(((s[f].pts-lv[0])/(nx[0]-lv[0]))*100):100;
     html+='<div class="hs-row"><div class="rk" style="color:'+(i===0?'var(--gold)':'var(--dim)')+'">'+(i+1)+'</div>'+
-    '<div><div class="nm2" style="color:'+P[f].hex+'">'+P[f].n+' '+f+'</div><div class="lane">'+P[f].lane+'</div><div class="lane" style="color:'+P[f].hex+'">WK UNITS: '+s[f].wk+(f==='Giancarlo'?' · DIALS: '+s[f].dials:'')+'</div></div>'+
+    '<div><div class="nm2" style="color:'+P[f].hex+'">'+P[f].n+' '+f+'</div><div class="lane">'+P[f].lane+'</div><div class="lane" style="color:'+P[f].hex+'">WK: '+s[f].wk+' · DOORS: '+s[f].doors+' · TALKS: '+s[f].talks+(s[f].dials?' · DIALS: '+s[f].dials:'')+(s[f].pilots?' · PILOTS: '+s[f].pilots:'')+'</div></div>'+
     '<div class="lvl" style="color:'+P[f].hex+'">'+lv[1]+'<div class="xp"><i style="width:'+pct+'%;background:'+P[f].hex+'"></i></div></div>'+
     '<div class="sc" style="color:'+P[f].hex+'">'+s[f].pts+'</div></div>';
   });
@@ -755,8 +933,10 @@ function viewScore(){
   html+='<div class="stat-grid">'+
   '<div class="stat"><div class="v">'+leads.length+'</div><div class="k">Spas on board</div></div>'+
   '<div class="stat"><div class="v" style="color:var(--win)">'+leads.filter(l=>l.stage===3).length+'</div><div class="k">Ready to call</div></div>'+
-  '<div class="stat"><div class="v" style="color:var(--gold)">'+leads.filter(l=>l.stage===5).length+'</div><div class="k">Meetings booked</div></div>'+
-  '<div class="stat"><div class="v" style="color:var(--win)">'+leads.filter(l=>l.stage===6).length+'</div><div class="k">Clients won</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--gold)">'+leads.filter(l=>l.stage===5).length+'</div><div class="k">Setup calls booked</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--p2)">'+leads.filter(l=>l.stage===9).length+'</div><div class="k">Pilots live</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--win)">'+leads.filter(l=>l.stage===6).length+'</div><div class="k">Signed clients</div></div>'+
+  '<div class="stat"><div class="v">'+leads.reduce((n,l)=>n+(l.doors||[]).filter(d=>d.at>=weekStartTs()&&d.outcome!=='pending').length,0)+'</div><div class="k">Doors this week</div></div>'+
   '<div class="stat'+(backlog>5?' warn':'')+'"><div class="v">'+backlog+'</div><div class="k">Audit backlog</div></div>'+
   '<div class="stat'+(leads.filter(isOverdue).length>0?' warn':'')+'"><div class="v">'+leads.filter(isOverdue).length+'</div><div class="k">Overdue follow-ups</div></div>'+
   (()=>{const tb=leads.reduce((s,l)=>s+(l.bookings||(l.bookedBy?1:0)),0),ns=leads.reduce((s,l)=>s+(l.noShows||0),0);
@@ -795,19 +975,16 @@ function openLead(id){
   const l=leads.find(x=>x.id===id);if(!l)return;sfx.tap();
   const bg=document.createElement('div');bg.className='modal-bg';bg.id='m-bg';
   bg.onclick=e=>{if(e.target===bg)bg.remove();};
-  let so='';for(let s=1;s<=8;s++)so+='<option value="'+s+'"'+(l.stage===s?' selected':'')+'>'+STAGES[s].n+'</option>';
+  let so='';STAGE_ORDER.forEach(s=>so+='<option value="'+s+'"'+(l.stage===s?' selected':'')+'>'+STAGES[s].n+'</option>');
   bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+'</h3><div class="m-city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+(l.phone?' · '+esc(l.phone):'')+'</div>'+
   (l.ammo?'<div class="ammo" style="margin-bottom:10px;background:#0A0716;border-left:4px solid var(--gold);padding:8px 10px;font-size:12.5px;color:var(--gold)">▶ '+esc(l.ammo)+'</div>':'')+
-  (l.stage===6&&l.closedAt?(()=>{
-    const pc=['live','revival','consults'].filter(k=>l.proof&&l.proof[k]).length;
-    const left=Math.max(0,30-daysAgo(l.closedAt));
+  ((l.stage===9||(l.stage===6&&l.pilotAt))&&l.pilotAt?(()=>{
+    const pc=proofCount(l),day=pilotDay(l),left=OFFER.pilotDays-day;
     const row=(k,txt)=>'<label class="proof-row'+(l.proof&&l.proof[k]?' done':'')+'" style="font-family:\'Outfit\';margin:8px 0 0;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--txt)"><input type="checkbox" '+(l.proof&&l.proof[k]?'checked':'')+' onchange="toggleProof('+l.id+',\''+k+'\')">'+txt+'</label>';
-    return '<label>DAY 30 PROOF CHECKPOINT · '+(pc===3?'LOCKED ✓':(left>0?left+' DAYS LEFT':'DUE NOW — SETUP FEE AT RISK'))+'</label>'+
-      row('live','Machine live — answering in under 60 seconds')+
-      row('revival','Ghost Patient Revival fired')+
-      row('consults','Consults on the calendar');
+    return '<label>PILOT PROOF · DAY '+day+'/30 · '+(pc===PROOF.length?'LOCKED ✓ — ASK FOR THE SIGN':(left>0?left+' DAYS TO THE DECISION':'DECISION DUE NOW'))+'</label>'+PROOF.map(p=>row(p[0],p[1])).join('');
   })():'')+
   '<label>STAGE</label><select id="m-stage">'+so+'</select>'+
+  '<div class="row2"><div><label>EMAIL</label><input id="m-email" type="email" placeholder="hello@glow.com" value="'+esc(l.email||'')+'"></div><div><label'+(reviewsOf(l)==null?' style="color:var(--lose)"':'')+'>GOOGLE REVIEWS #'+(reviewsOf(l)==null?' — NEEDED FOR ROUTES':'')+'</label><input id="m-reviews" inputmode="numeric" placeholder="214" value="'+esc(l.gReviews||(l.audit&&l.audit.a4count)||'')+'"'+(reviewsOf(l)==null?' style="border-color:var(--lose)"':'')+'></div></div>'+
   '<label'+(l.address?'':' style="color:var(--lose)"')+'>BUSINESS ADDRESS'+(l.address?'':' — MISSING, NEEDED TO MAIL THE REPORT')+'</label><input id="m-address" placeholder="1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660" value="'+esc(l.address||'')+'"'+(l.address?'':' style="border-color:var(--lose)"')+'>'+
   '<div class="row2"><div><label>PHONE</label><input id="m-phone" value="'+esc(l.phone||'')+'"></div><div><label>INSTAGRAM</label><input id="m-ig" value="'+esc(l.ig||'')+'"></div></div>'+
   '<label>NOTES</label><textarea id="m-notes" rows="3">'+esc(l.notes)+'</textarea>'+
@@ -819,12 +996,13 @@ function openLead(id){
 async function toggleProof(id,k){
   const l=leads.find(x=>x.id===id);if(!l)return;
   l.proof=l.proof||{};l.proof[k]=!l.proof[k];
+  const lbl=(PROOF.find(p=>p[0]===k)||[k,k])[1];logEv(l,(l.proof[k]?'Proof ✓ ':'Proof unchecked: ')+lbl);
   await saveLeads();
-  const pc=['live','revival','consults'].filter(x=>l.proof[x]).length;
-  if(pc===3){sfx.win();celebrate('PROOF LOCKED','DAY 30 DELIVERED · '+esc(l.name).toUpperCase()+' STAYS',true);}
+  const pc=proofCount(l);
+  if(pc===PROOF.length){sfx.win();celebrate('PROOF LOCKED','PILOT DELIVERED · '+esc(l.name).toUpperCase()+' · ASK FOR THE SIGN',true);}
   else sfx.pt();
 }
-async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);l.stage=parseInt(document.getElementById('m-stage').value);l.notes=document.getElementById('m-notes').value;l.address=document.getElementById('m-address').value.trim();l.phone=document.getElementById('m-phone').value.trim();l.ig=document.getElementById('m-ig').value.trim();document.getElementById('m-bg').remove();await saveLeads();render();}
+async function saveLeadEdit(id){const l=leads.find(x=>x.id===id);if(!l)return;const ns=parseInt(document.getElementById('m-stage').value);if(ns!==l.stage)setStage(l,ns);const notes=document.getElementById('m-notes').value;if(notes!==l.notes){l.notes=notes;}l.address=document.getElementById('m-address').value.trim();l.phone=document.getElementById('m-phone').value.trim();l.ig=document.getElementById('m-ig').value.trim();l.email=document.getElementById('m-email').value.trim();const rv=parseFloat((document.getElementById('m-reviews').value||'').replace(/[^0-9.]/g,''));l.gReviews=isNaN(rv)?'':rv;document.getElementById('m-bg').remove();await saveLeads();render();}
 
 /* ============ READINESS SCORE (who to call first) ============ */
 function numOf(v){const n=parseFloat(v);return isNaN(n)?null:n;}
@@ -906,6 +1084,448 @@ function exportIntel(){
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' RECORDS COPIED — PASTE INTO SHEETS');},()=>prompt('Copy this CSV:',csv));
   else prompt('Copy this CSV:',csv);
+}
+
+/* ============ TERRITORY + $1M AUTO-QUALIFY ============ */
+function territoryOf(l){
+  const a=((l.address||'')+' '+(l.city||'')).toLowerCase();
+  if(/\bil\b|illinois|\b60\d{3}\b/.test(a))return 'CHI';
+  if(/\bca\b|california|\b9[0-6]\d{3}\b/.test(a))return 'LA';
+  if(CHI_CITIES.some(c=>a.includes(c)))return 'CHI';
+  if(LA_CITIES.some(c=>a.includes(c)))return 'LA';
+  return 'OTHER';
+}
+function isChiCity(l){return /\bchicago\b/i.test((l.city||'')+' '+(l.address||''));}
+function reviewsOf(l){const n=numOf(l.audit&&l.audit.a4count);return n!=null?n:numOf(l.gReviews);}
+function revEst(l){const m=numOf(l.revEst);if(m!=null)return m;const r=reviewsOf(l);if(r==null)return null;const multi=/[\/&]|\band\b/i.test(l.owner||'')?1.3:1;return Math.round(r*REV_PER_REVIEW*multi);}
+function revBand(v){if(v==null)return 'UNKNOWN';if(v>=3500000)return '$3.5M+';if(v>=2000000)return '$2M–3.5M';if(v>=1200000)return '$1.2M–2M';if(v>=1000000)return '$1M–1.2M';return '<$1M';}
+function canPay(l){const v=revEst(l);return v==null?'?':v>=2000000?'A':v>=1000000?'B':'C';}
+function qualifies(l){
+  if(l.qualified==='no')return {ok:false,why:'MANUALLY EXCLUDED'};
+  if(!l.address)return {ok:false,why:'NO ADDRESS'};
+  if(l.stage===6||l.stage===7||l.stage===9)return {ok:false,why:STAGES[l.stage].n};
+  if(l.deadDoor)return {ok:false,why:'DOOR SAID NO'};
+  if(l.qualified==='yes')return {ok:true,why:'MANUAL YES'};
+  const v=revEst(l);
+  if(v==null)return {ok:false,why:'NO REVIEW COUNT'};
+  if(v<QUALIFY_MIN)return {ok:false,why:'EST '+revBand(v)};
+  return {ok:true,why:'EST '+revBand(v)};
+}
+function seatsLeft(t){return Math.max(0,OFFER.seatsPerCity-leads.filter(l=>l.stage===6&&l.result==='Won Founding'&&territoryOf(l)===t).length);}
+
+/* ============ DUPLICATE GUARD (app-wide) ============ */
+function normName(s){return (s||'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9 ]/g,' ').replace(/\b(the|med|medical|spa|medspa|aesthetics?|aesthetic|clinic|center|centre|llc|inc|and|of|skin|care|wellness|beauty|md|dr)\b/g,' ').replace(/\s+/g,' ').trim();}
+function digitsOf(p){return (p||'').replace(/\D/g,'');}
+function igKey(v){v=(v||'').toLowerCase().trim().replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/^@/,'').replace(/[\/?#].*$/,'').trim();if(v.length<3||/^(n\/?a|none|no|unknown|tbd|null|http|https|www|ig|insta|instagram)$/.test(v)||/[\s:]/.test(v))return '';return v;}
+function nameTokens(s){return new Set(normName(s).split(' ').filter(w=>w.length>=4));}
+function sharesToken(a,b){const ta=nameTokens(a.name),tb=nameTokens(b.name);for(const w of ta)if(tb.has(w))return true;return false;}
+function normAddr(a){return (a||'').toLowerCase().replace(/\b(suite|ste|unit)\b\.?\s*[\w-]+|#\s*[\w-]+/g,'').replace(/[^a-z0-9]/g,'');}
+function dupeReason(a,b){
+  const na=normName(a.name),nb=normName(b.name);
+  const ca=(a.city||'').toLowerCase().trim(),cb=(b.city||'').toLowerCase().trim();
+  if(na&&na===nb&&ca&&ca===cb)return 'SAME NAME + CITY';
+  const pa=digitsOf(a.phone),pb=digitsOf(b.phone);if(pa.length>=7&&pa===pb)return 'SAME PHONE';
+  const ia=igKey(a.ig),ib=igKey(b.ig);if(ia&&ia===ib)return 'SAME INSTAGRAM';
+  const aa=normAddr(a.address),ab=normAddr(b.address);if(aa.length>8&&aa===ab&&sharesToken(a,b))return 'SAME ADDRESS + SIMILAR NAME';
+  if(na&&na.length>3&&na===nb)return 'SAME NAME';
+  return null;
+}
+function findDupe(cand){for(const l of leads){if(l.id===cand.id)continue;const r=dupeReason(cand,l);if(r)return {l,r};}return null;}
+function dupePairs(){const out=[];for(let i=0;i<leads.length;i++)for(let j=i+1;j<leads.length;j++){const r=dupeReason(leads[i],leads[j]);if(r)out.push({a:leads[i],b:leads[j],r});}return out;}
+async function mergeLeads(keepId,dropId){
+  const k=leads.find(x=>x.id===keepId),d=leads.find(x=>x.id===dropId);if(!k||!d)return;
+  if(!confirm('MERGE "'+d.name+'" INTO "'+k.name+'"?\n\nEmpty fields fill from the duplicate; dials, doors, notes and audit data combine. The duplicate is removed.'))return;
+  ['owner','phone','ig','email','address','source','notes','ammo','cell','hours','angle','revEst','gReviews','meetingDate','nextTouch','pilotAt','pilotBy','closedAt','mailedAt','lat','lng'].forEach(f=>{if((k[f]==null||k[f]==='')&&d[f]!=null&&d[f]!=='')k[f]=d[f];});
+  k.audit=k.audit||{};Object.keys(d.audit||{}).forEach(f=>{if(!k.audit[f]&&d.audit[f])k.audit[f]=d.audit[f];});
+  if(!k.auditedBy&&d.auditedBy)k.auditedBy=d.auditedBy;if(!k.auditedAt&&d.auditedAt)k.auditedAt=d.auditedAt;
+  k.dials=(k.dials||[]).concat(d.dials||[]);k.doors=(k.doors||[]).concat(d.doors||[]).sort((a,b)=>a.at-b.at);k.noteLog=(k.noteLog||[]).concat(d.noteLog||[]);k.log=(k.log||[]).concat(d.log||[]).sort((a,b)=>a.t-b.t);
+  k.bookings=(k.bookings||0)+(d.bookings||0);k.noShows=(k.noShows||0)+(d.noShows||0);
+  if(d.stage!==7&&d.stage!==8&&stageOrder(d)>stageOrder(k)){k.stage=d.stage;if(d.bookedBy&&!k.bookedBy)k.bookedBy=d.bookedBy;if(d.closedBy&&!k.closedBy){k.closedBy=d.closedBy;k.tier=d.tier;k.mrr=d.mrr;k.result=d.result;}}
+  logEv(k,'Merged duplicate "'+d.name+'" (scouted by '+(d.addedBy||'?')+')');
+  leads=leads.filter(x=>x.id!==dropId);
+  Object.keys(routes.assign||{}).forEach(w=>{routes.assign[w]=(routes.assign[w]||[]).map(id=>id===dropId?keepId:id).filter((id,i,arr)=>arr.indexOf(id)===i);});
+  if(crmId===dropId)crmId=keepId;
+  await saveLeads();await saveRoutes();sfx.ready();toast('MERGED · ONE RECORD');render();
+}
+
+/* ============ ACTIVITY LOG + NOTES ============ */
+function logEv(l,ev){l.log=l.log||[];l.log.push({t:Date.now(),by:me||'',ev});if(l.log.length>300)l.log.shift();}
+function lastActivityTs(l){
+  let t=leadTs(l)||0;const day=d=>d?new Date(d+'T12:00:00').getTime():0;
+  t=Math.max(t,day(l.auditedAt),day(l.closedAt),day(l.pilotAt),day(l.mailedAt));
+  (l.dials||[]).forEach(d=>t=Math.max(t,day(d.at)));(l.doors||[]).forEach(d=>t=Math.max(t,d.at||0));(l.log||[]).forEach(e=>t=Math.max(t,e.t||0));(l.noteLog||[]).forEach(e=>t=Math.max(t,e.t||0));
+  return t;
+}
+function timeline(l){
+  const ev=[];const day=d=>d?new Date(d+'T12:00:00').getTime():null;
+  if(l.addedAt)ev.push({t:l.ts||day(l.addedAt),by:l.addedBy,ev:'Scouted onto the board'+(l.source?' via '+l.source:'')});
+  if(l.auditedAt)ev.push({t:day(l.auditedAt),by:l.auditedBy,ev:'Secret shop filed'+(l.ammo?' · “'+l.ammo+'”':'')});
+  (l.dials||[]).forEach(d=>ev.push({t:day(d.at),by:d.by,ev:'Dial logged'}));
+  (l.doors||[]).forEach(d=>ev.push({t:d.at,by:d.by,ev:'Door · '+(DOOR_LABEL[d.outcome]||d.outcome)+(d.note?' — '+d.note:'')}));
+  if(l.pilotAt)ev.push({t:day(l.pilotAt),by:l.pilotBy,ev:'Pilot started · 30 days free'});
+  if(l.closedAt&&l.stage===6)ev.push({t:day(l.closedAt)+1,by:l.closedBy,ev:'SIGNED · '+(l.tier||'')+' · $'+((+l.mrr)||0).toLocaleString()+'/mo'});
+  (l.noteLog||[]).forEach(n=>ev.push({t:n.t,by:n.by,ev:'Note: '+n.text}));
+  (l.log||[]).forEach(e=>ev.push(e));
+  return ev.filter(e=>e.t).sort((a,b)=>b.t-a.t);
+}
+function fmtTs(t){const d=new Date(t);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+async function addNote(id){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  const el=document.getElementById('note-in-'+id);const text=(el?el.value:'').trim();if(!text){toast('TYPE A NOTE FIRST');return;}
+  l.noteLog=l.noteLog||[];l.noteLog.push({t:Date.now(),by:me,text});delete drafts['note-in-'+id];
+  await saveLeads();sfx.pt();toast('NOTE SAVED');render();
+}
+async function setField(id,f,v){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  v=(v==null?'':String(v)).trim();
+  if(f==='revEst'||f==='gReviews'){const n=parseFloat(v.replace(/[^0-9.]/g,''));v=isNaN(n)?'':n;}
+  if(f==='stage'){const s=parseInt(v);if(s!==l.stage){setStage(l,s);}}
+  else l[f]=v;
+  delete drafts['pf-'+id+'-'+f];
+  await saveLeads();sfx.tap();render();
+}
+function setStage(l,s){
+  const from=STAGES[l.stage]?STAGES[l.stage].n:l.stage;
+  l.stage=s;
+  if(s===9&&!l.pilotAt){l.pilotAt=new Date().toISOString().slice(0,10);l.pilotBy=l.pilotBy||me;}
+  if(s===6&&!l.closedAt){l.closedAt=new Date().toISOString().slice(0,10);l.closedBy=l.closedBy||me;}
+  logEv(l,'Stage '+from+' → '+STAGES[s].n);
+}
+async function markMailed(id){const l=leads.find(x=>x.id===id);if(!l)return;l.mailedAt=new Date().toISOString().slice(0,10);logEv(l,'Secret shopper report mailed');await saveLeads();sfx.ready();toast('REPORT MAILED · IN THE BUILDING');render();}
+async function reviveToNurture(id){const l=leads.find(x=>x.id===id);if(!l)return;l.stage=8;l.result='Nurture';l.nextTouch=new Date(Date.now()+30*86400000).toISOString().slice(0,10);logEv(l,'Moved to nurture · resurfaces in 30d');await saveLeads();toast('NURTURING');render();}
+
+/* ============ PILOT (30 days free · Patheom) ============ */
+function proofCount(l){return PROOF.filter(p=>l.proof&&l.proof[p[0]]).length;}
+function pilotDay(l){return l.pilotAt?Math.min(OFFER.pilotDays,Math.max(0,daysAgo(l.pilotAt))):0;}
+async function startPilot(id){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  if(!confirm('START THE 30-DAY PILOT FOR '+l.name.toUpperCase()+'?\n\nFree, no card, no contract. Film week one, posts go up, inbox answered. Day 30 their numbers decide.'))return;
+  l.stage=9;l.pilotAt=new Date().toISOString().slice(0,10);l.pilotBy=me;l.proof=l.proof||{};l.meetingDate='';
+  l.nextTouch=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+  logEv(l,'Pilot started — filming day + setup call this week');
+  await saveLeads();flash();sfx.win();celebrate('PILOT LIVE','+'+PTS.pilot+' PTS · '+esc(l.name).toUpperCase()+' · FILM WEEK ONE',true);checkLevelUp();render();
+}
+async function shutOffPilot(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const r=prompt('Shut off the pilot? Why? (numbers / ghosted / not a fit)','numbers');if(r===null)return;
+  l.stage=8;l.result='Pilot off: '+r;l.nextTouch=new Date(Date.now()+90*86400000).toISOString().slice(0,10);
+  logEv(l,'Pilot shut off ('+r+') — they keep the Playbook · resurfaces in 90d');
+  await saveLeads();toast('SHUT OFF · PLAYBOOK STAYS WITH THEM');render();
+}
+
+/* ============ DEAL HEAT (how close to a close) ============ */
+function heat(l){
+  if(l.stage===6)return 100;if(l.stage===7)return 0;
+  const base={1:5,2:12,3:25,4:38,5:60,9:80,8:15}[l.stage]||0;
+  let h=base+readiness(l)/10;
+  h+=Math.min(8,(l.dials||[]).length*3);
+  if(l.email)h+=2;if(l.cell)h+=3;if(l.mailedAt)h+=4;if(l.meetingDate)h+=3;
+  const ld=(l.doors||[]).slice(-1)[0];
+  if(ld){if(ld.outcome==='talked')h+=8;else if(ld.outcome==='ret')h+=5;else if(ld.outcome==='booked')h+=10;else if(ld.outcome==='no')h-=20;}
+  if(l.stage===9)h+=proofCount(l)*4;
+  if(isOverdue(l))h-=10;
+  h-=(l.noShows||0)*8;
+  const la=lastActivityTs(l);if(l.stage>=3&&l.stage!==8&&la&&(Date.now()-la)>14*86400000)h-=8;
+  return Math.max(1,Math.min(99,Math.round(h)));
+}
+function heatMeta(h){return h>=100?['CLOSED','#6DFF8F']:h>=75?['ON FIRE','#FFD34D']:h>=50?['HOT','#FF5FA2']:h>=25?['WARM','#4DE3FF']:['COLD','#8F84B8'];}
+function heatBar(l,big){
+  const h=heat(l),[lbl,c]=heatMeta(h);
+  const d=(l.heatLast!=null&&l.heatPrev!=null)?l.heatLast-l.heatPrev:0;
+  const tr=d>0?'<span class="trend-up">▲ +'+d+'</span>':d<0?'<span class="trend-dn">▼ '+d+'</span>':'<span>—</span>';
+  return '<div class="heat'+(big?' big':'')+'" style="--hc:'+c+'"><div class="hb"><i style="width:'+h+'%"></i></div><div class="hl"><span>DEAL HEAT · <b>'+lbl+'</b></span><span>'+tr+' · <b>'+h+'%</b></span></div></div>';
+}
+
+/* ============ NEXT MOVE — sales brain (Hormozi · Voss · Sandler · Belfort · Challenger · Cialdini) ============ */
+function nextMove(l){
+  const a=l.audit||{},own=((l.owner||'')+'').split(/[\/&,]|\band\b/)[0].trim()||'the owner',dm=numOf(a.a1hrs),ig=numOf(a.a5days),od=isOverdue(l),seats=seatsLeft(territoryOf(l)),city=l.city||'your area';
+  const A=(label,fn)=>({label,fn});
+  const dmLine=dm!=null?'I DM’d your practice as a patient asking about lip filler and it took '+r1(dm)+' hours to hear back.':'I DM’d your practice as a patient and timed the reply.';
+  const igLine=ig!=null?' Your last Instagram post was '+ig+' days ago.':'';
+  const offer='Thirty days, free, no card, no contract. We film you week one, posts go up, the inbox gets answered in under a minute — day 30 your own numbers decide.';
+  if(l.stage===6)return {k:'SIGNED · COMPOUND IT',t:'Ask for the case study and two intros this week',w:'Founding terms bought a case study and 90 seconds of the doctor on camera. Cash both in inside week one, while the win is loudest. Referrals at peak satisfaction convert 3× cold.',s:'“Who are two practice owners you respect with the same 9pm DM problem? I’ll secret-shop them first and bring their numbers, exactly like I did for you.”',p:'HORMOZI · ASK AT PEAK SATISFACTION · CIALDINI · RECIPROCITY',acts:[A('ADD NOTE',"crmId="+l.id+";crmView='profiles';go('crm')")]};
+  if(l.stage===7)return {k:'LOST · LEAVE THE DOOR OPEN',t:'One message, no chase',w:'Chasing a lost deal lowers your status. One clean line that makes returning easy, then silence.',s:'“Totally understand. I’ll leave the report with you. If the 9pm DMs ever become a problem, the 30-day pilot is still free.”',p:'VOSS · REMOVE PRESSURE = REMOVE RESISTANCE',acts:[A('BACK TO NURTURE',"reviveToNurture("+l.id+")")]};
+  if(l.stage===8)return {k:'NURTURE · RE-OPEN WITH NEW EVIDENCE',t:'Re-shop them, then return with a fresh number',w:'Nobody responds to the same pitch twice. They respond to new proof. A second secret shop gives you a brand-new opener and shows you never stopped watching.',s:'“Quick one — I shopped you again last week. Still '+(dm!=null?r1(dm)+' hours':'a full day')+' to answer a filler DM. Want to see what changed at the practices that fixed it?”',p:'CHALLENGER · TEACH SOMETHING NEW',acts:[A('REVIVE → READY',"reviveLead("+l.id+")"),A('EDIT AUDIT',"shopId="+l.id+";go('shop')")]};
+  if(l.stage<=2)return {k:'PROOF BEFORE PITCH',t:'Finish the secret shop — the audit IS the pitch',w:'Nobody argues with their own numbers. Every empty test is a missing line in the report you’ll mail them. '+(auditCount(l)<5?(5-auditCount(l))+' test'+(5-auditCount(l)===1?'':'s')+' left.':'Write the ammo line.'),s:'The ammo line = their three worst numbers in one sentence: “26 hrs to answer a filler DM, no text back at lunch, 47 reviews vs the practice down the street at 210.”',p:'HORMOZI · LEAD WITH VALUE, EARN THE ASK',acts:[A('OPEN AUDIT',"shopId="+l.id+";go('shop')")]};
+  if(od&&l.stage!==9)return {k:'OVERDUE · SPEED TO LEAD CUTS BOTH WAYS',t:'Touch them today with a no-oriented question',w:'You sell response time. A stale follow-up from you kills the frame. Make “no” the easy answer — people answer “no” questions fast, and a no here reopens the door.',s:'“Have you given up on fixing the 9pm DM problem?” — then stop talking.',p:'VOSS · NO-ORIENTED QUESTION · HORMOZI · THE FORTUNE IS IN THE FOLLOW-UP',acts:[A('+1 DIAL',"logDial("+l.id+")"),A('FOLLOW-UP',"setTouch("+l.id+")")]};
+  if(l.stage===3||(l.stage===4&&!(l.dials||[]).length&&!(l.doors||[]).length))return {k:'FIRST TOUCH · THEIR NUMBER, NOT YOUR NAME',t:'Open with the ammo line and ask for nothing',w:'The first ten seconds decide whether you’re a vendor or a colleague showing them a leak. Lead with evidence, label the pain, offer the report. No pitch.',s:'“Hi '+esc(own)+', Giancarlo, Patheom, we’re local. Not selling anything today. '+dmLine+igLine+' Whoever answers first gets that consult. I put the full report together — want me to drop it by, or is there someone who runs your Instagram I should send it to?”',p:'VOSS · LABEL THE PAIN · SANDLER · PAIN FUNNEL',acts:[A('+1 DIAL',"logDial("+l.id+")"),A('REPORT MAILED',"markMailed("+l.id+")"),A('BOOK SETUP CALL',"bookMeeting("+l.id+")")]};
+  if(l.stage===4)return {k:'CONTACTED · REMOVE EVERY REASON TO WAIT',t:'Make the pilot impossible to refuse',w:'They know the leak. Now collapse risk and delay: free 30 days, no card, filmed week one, guarantee under 60 seconds. Then scarcity that is true, and a choice instead of a yes/no.',s:'“'+offer+' We’re taking three founding practices in '+esc(city)+' at $2,000 instead of $3,500'+(seats!=null?' — '+seats+' seat'+(seats===1?'':'s')+' left':'')+'. Setup call is 15 minutes. Tomorrow at 10 or Thursday at 2?”',p:'HORMOZI · GRAND SLAM OFFER (RISK REVERSAL + REAL SCARCITY) · ALTERNATIVE CLOSE',acts:[A('BOOK SETUP CALL',"bookMeeting("+l.id+")"),A('+1 DIAL',"logDial("+l.id+")")]};
+  if(l.stage===5){
+    if((l.noShows||0)>0&&!l.meetingDate)return {k:'NO-SHOW · DON’T CHASE, RE-ANCHOR',t:'Hold the spot, offer two times',w:'Chasing lowers your status. Assume good faith, remove friction, close on a choice.',s:'“No stress — I held your spot. Two options: Tue 2pm or Thu 11am. Which is easier?”',p:'BELFORT · CERTAINTY IN TONE · ALTERNATIVE CLOSE',acts:[A('REBOOK',"bookMeeting("+l.id+")")]};
+    return {k:'MEETING SET · CERTAINTY × 3',t:'Prep: report printed, a filming date picked',w:'A close needs certainty in the product, in you, and in the company. Product = their printed report. You = the door-to-door story. Company = founding seats. Ask for a filming day, not a decision.',s:'Open: “Here’s your report.” Middle: “Here’s what the posts look like. Here’s what happens when someone DMs — text this number.” Close: “Filming is one hour whenever it’s dead. Which day next week?”',p:'BELFORT · 3 CERTAINTIES · SANDLER · UP-FRONT CONTRACT',acts:[A('START PILOT',"startPilot("+l.id+")"),A('NO-SHOW',"noShow("+l.id+")")]};
+  }
+  if(l.stage===9){const day=pilotDay(l),pc=proofCount(l);
+    if(day>=23)return {k:'PILOT DAY '+day+' · BOOK THE DECISION CALL',t:'Present the five numbers before day 30',w:'Never let day 30 arrive without a meeting on the calendar. Messages in, consults booked, show rate, reviews, what those consults were worth. Then the 6-month, setup waived inside 7 days.',s:'“Day 30 is '+(OFFER.pilotDays-day)+' days out. Let’s look at the numbers together Thursday — every message answered, consults booked, what they were worth. If it did nothing, we shut it off and you keep the Playbook. If it worked, setup is waived if you sign within the week.”',p:'HORMOZI · PROOF → ASK · A DEADLINE THAT IS REAL',acts:[A('SIGNED → WON',"winLead("+l.id+")"),A('SHUT OFF',"shutOffPilot("+l.id+")")]};
+    return {k:'PILOT DAY '+day+' · OVER-DELIVER EARLY',t:'Week one is the whole pilot: film, post, answer',w:'Proof compounds. Filmed by day 7, three posts live, inbox answering in under a minute — checked off here so the whole team sees it. '+(PROOF.length-pc)+' proof item'+(PROOF.length-pc===1?'':'s')+' open.',s:'Day-7 text: “First three posts are live and the inbox has answered every message in under a minute so far. Day 30 we look at consults together.”',p:'CIALDINI · RECIPROCITY + COMMITMENT',acts:[A('PROOF CHECKLIST',"openLead("+l.id+")")]};
+  }
+  return {k:'NEXT',t:'Keep moving',w:'',s:'',p:'',acts:[]};
+}
+function moveCard(l){
+  const m=nextMove(l);
+  return '<div class="move"><div class="mv-k">▶ NEXT MOVE · '+m.k+'</div><div class="mv-t">'+m.t+'</div>'+(m.w?'<div class="mv-w">'+m.w+'</div>':'')+(m.s?'<div class="mv-s">'+m.s+'</div>':'')+(m.p?'<div class="mv-p">'+m.p+'</div>':'')+
+  (m.acts.length?'<div class="act-row">'+m.acts.map(x=>'<button class="btn gold" onclick="'+x.fn+'">'+x.label+'</button>').join('')+'</div>':'')+'</div>';
+}
+
+/* ============ CRM TAB ============ */
+function viewCRM(){
+  let html='<h2>CRM</h2><div class="sub-h">Every spa, every touch, one record. Deal heat says how close. Next Move says what to do.</div>';
+  const dp=dupePairs().length;
+  const segs=[['profiles','PROFILES'],['database','DATABASE'],['email','EMAIL'],['dupes','DUPES'+(dp?' ('+dp+')':'')]];
+  html+='<div class="seg">'+segs.map(s=>'<div class="'+(crmView===s[0]?'on':'')+'" onclick="crmView=\''+s[0]+'\';crmId=null;render()">'+s[1]+'</div>').join('')+'</div>';
+  if(crmView==='database')return html+viewIntel().replace('<h2>INTEL DATABASE</h2>','');
+  if(crmView==='email')return html+viewEmail();
+  if(crmView==='dupes')return html+viewDupes();
+  if(crmId){const l=leads.find(x=>x.id===crmId);if(l)return html+profileHTML(l);crmId=null;}
+  const q=crmQ.toLowerCase().trim();
+  const list=leads.filter(l=>!q||[l.name,l.city,l.owner,l.email,l.phone,l.address,l.source].some(v=>(v||'').toLowerCase().includes(q))).sort((a,b)=>heat(b)-heat(a));
+  html+='<input id="crm-q" placeholder="Search name, city, owner, email… (enter)" value="'+esc(crmQ)+'" onchange="crmQ=this.value;render()">';
+  html+='<div class="pool" style="margin-top:10px">'+leads.length+' RECORDS · SHOWING <b>'+list.length+'</b> · ON FIRE <b>'+leads.filter(l=>{const h=heat(l);return h>=75&&h<100;}).length+'</b> · HOT <b>'+leads.filter(l=>{const h=heat(l);return h>=50&&h<75;}).length+'</b> · SIGNED <b>'+leads.filter(l=>l.stage===6).length+'</b></div>';
+  if(!list.length)html+='<div class="empty">No records match.</div>';
+  list.forEach(l=>{const h=heat(l),c=heatMeta(h)[1];
+    html+='<div class="crm-row" onclick="crmId='+l.id+';sfx.tap();render()"><div class="b"><div class="nm">'+esc(l.name)+'</div><div class="sub">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+' · '+(l.email?'✉ ':'')+(l.phone?'☎ ':'')+(l.address?'📍':'<span class="miss">no addr</span>')+'</div>'+heatBar(l,false)+'</div><div style="text-align:right"><div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div><div class="hp" style="color:'+c+';margin-top:8px">'+h+'%</div></div></div>';
+  });
+  return html;
+}
+function pf(l,f,label,ph,type,full){return '<div class="f'+(full?' full':'')+'"><label>'+label+'</label><input id="pf-'+l.id+'-'+f+'" '+(type?'type="'+type+'" ':'')+'placeholder="'+esc(ph||'')+'" value="'+esc(l[f]==null?'':l[f])+'" onchange="setField('+l.id+',\''+f+'\',this.value)"></div>';}
+function profileHTML(l){
+  const q=qualifies(l),rv=revEst(l),t=territoryOf(l),a=l.audit||{};
+  let so='';STAGE_ORDER.forEach(s=>so+='<option value="'+s+'"'+(l.stage===s?' selected':'')+'>'+STAGES[s].n+'</option>');
+  const cell=(k,v)=>'<div class="db-cell"><span class="db-k">'+k+'</span><span class="db-v">'+(v?esc(v):'—')+'</span></div>';
+  let html='<div class="prof-h"><div class="row-top"><div><div class="nm">'+esc(l.name)+'</div><div class="city">'+esc(l.city)+(l.owner?' · '+esc(l.owner):'')+' · '+t+(rv!=null?' · EST '+revBand(rv):'')+'</div></div><div style="text-align:right;flex:0 0 auto"><div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div><div style="margin-top:6px">'+rdBadge(l,true)+'</div></div></div>'+heatBar(l,true)+(l.stage===9?d30Chip(l):'')+'</div>';
+  html+=moveCard(l);
+  html+='<div class="contact-grid">'+
+    (l.phone?'<a class="cbtn" href="tel:'+esc(digitsOf(l.phone))+'">CALL</a>':'<span class="cbtn off">CALL</span>')+
+    (l.cell?'<a class="cbtn" href="sms:'+esc(digitsOf(l.cell))+'">TEXT OWNER</a>':'<span class="cbtn off">TEXT OWNER</span>')+
+    (l.email?'<a class="cbtn" href="mailto:'+esc(l.email)+'">EMAIL</a>':'<span class="cbtn off">EMAIL</span>')+
+    (l.ig?'<a class="cbtn pink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">INSTAGRAM</a>':'<span class="cbtn off">INSTAGRAM</span>')+
+    (l.address?'<a class="cbtn" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">MAP</a>':'<span class="cbtn off">MAP</span>')+
+    '<span class="cbtn" onclick="shopId='+l.id+';go(\'shop\')">AUDIT</span></div>';
+  html+='<label>RECORD · EVERY EDIT SAVES ON BLUR</label><div class="kv">'+
+    '<div class="f"><label>STAGE</label><select onchange="setField('+l.id+',\'stage\',this.value)">'+so+'</select></div>'+
+    pf(l,'owner','OWNER / ASK FOR','Dr. Sarah Kim')+
+    pf(l,'phone','PRACTICE PHONE','949 555 0142','tel')+
+    pf(l,'cell','OWNER CELL (TEXT)','949 555 0199','tel')+
+    pf(l,'email','EMAIL','hello@glow.com','email')+
+    pf(l,'ig','INSTAGRAM','@glowaesthetics')+
+    pf(l,'address','BUSINESS ADDRESS','1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660',null,true)+
+    pf(l,'hours','HOURS / DARK DAYS','Tue–Sat 10–6, closed Sun–Mon')+
+    pf(l,'source','SOURCE','IG hashtag, drove past, referral')+
+    pf(l,'gReviews','GOOGLE REVIEWS #','214')+
+    pf(l,'revEst','EST. REVENUE /YR (OVERRIDE)','1500000')+
+    '<div class="f"><label>ROUTE QUALIFY</label><select onchange="setField('+l.id+',\'qualified\',this.value)"><option value=""'+(!l.qualified?' selected':'')+'>AUTO · '+(q.ok?'YES':'NO')+' · '+esc(q.why)+'</option><option value="yes"'+(l.qualified==='yes'?' selected':'')+'>FORCE YES</option><option value="no"'+(l.qualified==='no'?' selected':'')+'>FORCE NO</option></select></div>'+
+    pf(l,'nextTouch','NEXT FOLLOW-UP','','date')+
+    pf(l,'angle','DOOR ANGLE (ONE LINE FOR THE ROUTE)','Owner greets at the door. Ask for Karla — she runs the money.',null,true)+
+    '</div>';
+  html+='<label>SECRET SHOP · '+auditCount(l)+'/5'+(l.auditedBy?' · '+esc(l.auditedBy):'')+'</label><div class="db-grid" style="border:2px solid var(--line)">'+cell('DM REPLY (HRS)',a.a1hrs)+cell('MISSED-CALL TEXT',a.a2text)+cell('WEB FORM (HRS)',a.a3hrs)+cell('REVIEWS · STARS',(a.a4count||'')+(a.a4stars?' · '+a.a4stars+'★':''))+cell('IG SILENCE (DAYS)',a.a5days)+cell('LAST IG POST',a.a5date)+'</div>'+(l.ammo?'<div class="db-ammo" style="border:2px solid var(--line);border-top:none">▶ '+esc(l.ammo)+'</div>':'');
+  html+='<label>PIPELINE</label><div class="pool">DIALS <b>'+(l.dials||[]).length+'</b> · DOORS <b>'+(l.doors||[]).length+'</b> · MEETINGS <b>'+(l.bookings||0)+'</b> · NO-SHOWS <b class="bad">'+(l.noShows||0)+'</b>'+(l.meetingDate?'<br>MEETING: <b>'+esc(l.meetingDate)+'</b>':'')+(l.mailedAt?'<br>REPORT MAILED: <b>'+esc(l.mailedAt)+'</b>':'<br>REPORT: <b class="bad">NOT MAILED</b>')+(l.pilotAt?'<br>PILOT DAY <b>'+pilotDay(l)+'/'+OFFER.pilotDays+'</b> · PROOF <b>'+proofCount(l)+'/'+PROOF.length+'</b>':'')+(l.stage===6?'<br>SIGNED: <b>'+esc(l.tier||'')+' · $'+((+l.mrr)||0).toLocaleString()+'/MO</b>':'')+'</div>';
+  html+='<div class="act-row">'+(l.mailedAt?'':'<button class="btn ghost" onclick="markMailed('+l.id+')">REPORT MAILED</button>')+'<button class="btn ghost" onclick="logDial('+l.id+')">+1 DIAL</button><button class="btn ghost" onclick="setTouch('+l.id+')">FOLLOW-UP</button><button class="btn ghost" onclick="openLead('+l.id+')">'+(l.stage===9?'PROOF CHECKLIST':'QUICK EDIT')+'</button></div>';
+  html+='<label>NOTES</label><textarea id="note-in-'+l.id+'" rows="2" placeholder="Who you talked to, what they said, when to come back"></textarea><button class="btn gold" style="margin-top:8px" onclick="addNote('+l.id+')">ADD NOTE</button>';
+  if(l.notes)html+='<div class="note"><div class="t">ORIGINAL NOTE</div>'+esc(l.notes)+'</div>';
+  (l.noteLog||[]).slice().reverse().forEach(n=>html+='<div class="note"><div class="t">'+esc(n.by||'')+' · '+fmtTs(n.t)+'</div>'+esc(n.text)+'</div>');
+  const tl=timeline(l);
+  html+='<label>TIMELINE · '+tl.length+' EVENTS</label><div class="tl">'+tl.slice(0,40).map(e=>'<div class="ev"><span class="t">'+fmtTs(e.t)+(e.by?' · '+esc(e.by):'')+'</span>'+esc(e.ev)+'</div>').join('')+'</div>';
+  html+='<button class="btn ghost" onclick="crmId=null;render()">← ALL RECORDS</button>';
+  return html;
+}
+function viewEmail(){
+  const withE=leads.filter(l=>l.email).sort((a,b)=>heat(b)-heat(a));
+  let html='<div class="pool">CONTACTS WITH EMAIL <b>'+withE.length+'</b> · MISSING <b class="bad">'+(leads.length-withE.length)+'</b> · OUTLOOK <b class="bad">NOT CONNECTED</b></div>';
+  html+='<div class="lock"><span class="px">SEQUENCES · LOCKED</span>Waiting on the offer copy. When it lands: mass batches auto-personalized from this CRM (their DM time, IG gap, review gap, seats left in their city), 3-touch cadence, replies logged back to each record.</div>';
+  html+='<div class="lock" style="text-align:left"><span class="px">OUTLOOK BRIDGE · HOW IT WORKS TODAY</span>Sending from this page needs a Microsoft app registration (client ID) — not wired yet. Until then: <b style="color:var(--txt)">EXPORT EMAIL LIST</b>, hand the CSV to Claude with the batch prompt, and it drafts every personalized email in your Outlook for one-tap send.</div>';
+  html+='<button class="btn gold" onclick="exportEmails()">⬇ EXPORT EMAIL LIST (CSV)</button>';
+  if(!withE.length)html+='<div class="empty" style="margin-top:12px"><span class="px">NO EMAILS YET</span>Add them on the HUNT form or in any CRM profile.</div>';
+  withE.forEach(l=>{const h=heat(l),c=heatMeta(h)[1];html+='<div class="crm-row" onclick="crmId='+l.id+';crmView=\'profiles\';render()"><div class="b"><div class="nm">'+esc(l.name)+'</div><div class="sub"><a class="clink" href="mailto:'+esc(l.email)+'" onclick="event.stopPropagation()">'+esc(l.email)+'</a>'+(l.owner?' · '+esc(l.owner):'')+'</div></div><div style="text-align:right"><div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div><div class="hp" style="color:'+c+';margin-top:8px">'+h+'%</div></div></div>';});
+  return html;
+}
+function exportEmails(){
+  const A=leads.filter(l=>l.email).sort((a,b)=>heat(b)-heat(a));if(!A.length){toast('NO EMAILS YET');return;}
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['Name','Email','Owner','City','Territory','Stage','Heat','Rank','DM reply (raw)','Missed-call text','Web form (raw)','Reviews','Stars','IG silence (days)','Ammo line','Report mailed','Phone','Instagram','Address']];
+  A.forEach(l=>{const a=l.audit||{};rows.push([l.name,l.email,l.owner,l.city,territoryOf(l),STAGES[l.stage].n,heat(l),rdRank(readiness(l))[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5days,l.ammo,l.mailedAt||'',l.phone,l.ig,l.address||'']);});
+  const csv=rows.map(r=>r.map(q).join(',')).join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' CONTACTS COPIED');},()=>prompt('Copy this CSV:',csv));else prompt('Copy this CSV:',csv);
+}
+function viewDupes(){
+  const pairs=dupePairs();
+  let html='<div class="pool">'+(pairs.length?'<span class="bad">'+pairs.length+' POSSIBLE DUPLICATE'+(pairs.length===1?'':'S')+'</span>':'NO DUPLICATES · BOARD IS CLEAN')+'<br>EVERY NEW LEAD IS CHECKED ON ENTRY: NAME+CITY · PHONE · INSTAGRAM · ADDRESS</div>';
+  pairs.forEach(p=>{const row=l=>'<div style="font-weight:800">'+esc(l.name)+'</div><div style="font-size:11.5px;color:var(--dim)">'+esc(l.city)+' · '+STAGES[l.stage].n+' · audit '+auditCount(l)+'/5 · scout '+esc(l.addedBy)+(l.address?' · 📍':'')+'</div>';
+    html+='<div class="dupe"><div class="why">⚠ '+p.r+'</div>'+row(p.a)+'<div style="margin:8px 0;font-family:\'Press Start 2P\';font-size:6px;color:var(--dim)">VS</div>'+row(p.b)+'<div class="act-row"><button class="btn gold" onclick="mergeLeads('+p.a.id+','+p.b.id+')">KEEP TOP · MERGE</button><button class="btn ghost" onclick="mergeLeads('+p.b.id+','+p.a.id+')">KEEP BOTTOM · MERGE</button></div></div>';});
+  return html;
+}
+
+/* ============ DOOR ROUTES (auto every Friday · $1M+ qualified · no dupes app-wide) ============ */
+function routeWeekKey(){const d=new Date();const back=(d.getDay()-5+7)%7;const f=new Date(d.getFullYear(),d.getMonth(),d.getDate()-back);return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');}
+function weekStartTs(){return new Date(routeWeekKey()+'T00:00:00').getTime();}
+function nextFridayStr(){const d=new Date();const fwd=((5-d.getDay()+7)%7)||7;const f=new Date(d.getFullYear(),d.getMonth(),d.getDate()+fwd);return f.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
+function km(a,b){const R=6371,dl=(b.lat-a.lat)*Math.PI/180,dg=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dl/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+const mi=k=>(k*0.621371).toFixed(1);
+function lastDoor(l){const d=l.doors||[];return d.length?d[d.length-1]:null;}
+function doorThisWeek(l,who){return (l.doors||[]).find(d=>d.at>=weekStartTs()&&(!who||d.by===who));}
+function timeStr(ts){const t=new Date(ts);const h=t.getHours(),m=String(t.getMinutes()).padStart(2,'0');return (h%12||12)+':'+m+(h<12?'am':'pm');}
+function routePriority(l){let p=readiness(l)+heat(l)/2;const v=revEst(l)||0;p+=Math.min(30,v/100000);const ld=lastDoor(l);if(ld&&ld.outcome==='ret')p+=40;if(ld&&ld.outcome!=='ret'&&(Date.now()-ld.at)<14*86400000)p-=60;if(l.mailedAt)p+=15;return p;}
+function orderRoute(ids){
+  const L=ids.map(id=>leads.find(x=>x.id===id)).filter(Boolean);if(L.length<3)return L.map(l=>l.id);
+  if(L.filter(l=>l.lat!=null).length<L.length*0.7)return L.slice().sort((a,b)=>(a.city||'').localeCompare(b.city||'')).map(l=>l.id);
+  const out=[L[0]],left=L.slice(1);let cur=L[0];
+  while(left.length){let bi=0,bd=1e9;left.forEach((l,i)=>{const d=(l.lat!=null&&cur.lat!=null)?km(cur,l):400;if(d<bd){bd=d;bi=i;}});cur=left.splice(bi,1)[0];out.push(cur);}
+  return out.map(l=>l.id);
+}
+function generateRoutes(){
+  const pool=leads.filter(l=>qualifies(l).ok).sort((a,b)=>routePriority(b)-routePriority(a));
+  const chi=pool.filter(l=>territoryOf(l)==='CHI'),la=pool.filter(l=>territoryOf(l)==='LA');
+  const assign={Giancarlo:[],Kon:[],Chandler:[],Fein:[]},used=new Set();
+  const take=(who,arr)=>{for(const l of arr){if(assign[who].length>=QUOTA[who].n)break;if(used.has(l.id))continue;used.add(l.id);assign[who].push(l.id);}};
+  take('Chandler',chi.filter(isChiCity));
+  const rest=chi.filter(l=>!used.has(l.id)&&!isChiCity(l)),geo=rest.filter(l=>l.lat!=null);
+  if(rest.length>2&&geo.length>=rest.length*0.7){
+    const lats=geo.map(l=>l.lat).sort((a,b)=>a-b),med=lats[Math.floor(lats.length/2)];
+    take('Giancarlo',rest.filter(l=>l.lat==null||l.lat>=med));take('Kon',rest.filter(l=>l.lat!=null&&l.lat<med));
+  }else rest.forEach(l=>{const who=assign.Giancarlo.length<=assign.Kon.length?'Giancarlo':'Kon';if(assign[who].length<QUOTA[who].n&&!used.has(l.id)){used.add(l.id);assign[who].push(l.id);}});
+  take('Giancarlo',chi);take('Kon',chi);take('Chandler',chi);
+  take('Fein',la);
+  Object.keys(assign).forEach(w=>assign[w]=orderRoute(assign[w]));
+  routes.week=routeWeekKey();routes.gen=Date.now();routes.genBy=me||'auto';routes.assign=assign;
+}
+async function ensureRoutes(){if(!leadsLoaded)return;if(routes.week!==routeWeekKey()){generateRoutes();await saveRoutes();}}
+async function regenRoutes(){if(!confirm('REBUILD THIS WEEK\'S ROUTES FOR ALL FOUR?\n\nDoor outcomes already logged stay on each lead. Only the assignments change.'))return;generateRoutes();await saveRoutes();sfx.ready();toast('ROUTES REBUILT · NO DUPES');routeFocus=null;render();}
+async function geocodePending(){
+  if(geoBusy)return;
+  const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000));
+  if(!pend.length){toast('ALL ADDRESSES MAPPED');return;}
+  geoBusy=true;let n=0;toast('MAPPING '+pend.length+' ADDRESSES…');
+  for(const l of pend){
+    try{const q=l.address+(l.city&&!l.address.toLowerCase().includes(l.city.toLowerCase())?', '+l.city:'');
+      const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q));const j=await r.json();
+      if(j&&j[0]){l.lat=parseFloat(j[0].lat);l.lng=parseFloat(j[0].lon);n++;}
+    }catch(e){}
+    l.geoTried=Date.now();
+    await new Promise(r=>setTimeout(r,1100));
+  }
+  geoBusy=false;
+  if(n&&routes.assign)Object.keys(routes.assign).forEach(w=>routes.assign[w]=orderRoute(routes.assign[w]||[]));
+  await saveLeads();await saveRoutes();
+  toast(n+'/'+pend.length+' ADDRESSES MAPPED');if(tab==='route')render();
+}
+function slotsFor(stops){let t=10*60;const out=[];for(let i=0;i<stops.length;i++){if(i>0){const a=stops[i-1],b=stops[i];const drive=(a.lat!=null&&b.lat!=null)?Math.min(45,Math.max(8,Math.round(km(a,b)/0.55))):15;t+=25+drive;}if(t>=12*60+15&&t<13*60+30)t=13*60+30;out.push(t);}return out.map(m=>{const h=Math.floor(m/60),mm=String(m%60).padStart(2,'0');return (h%12||12)+':'+mm+(h<12?'a':'p');});}
+function neighborAmmo(l){
+  let nb=null;
+  leads.forEach(o=>{if(o.id===l.id||normName(o.name)===normName(l.name))return;const r=reviewsOf(o);if(r==null||r<200)return;
+    if(l.lat!=null&&o.lat!=null){const k=km(l,o);if(k<4.5&&(!nb||k<nb.k))nb={name:o.name,n:r,k,txt:mi(k)+' mi away'};}
+    else if(!nb&&(o.city||'').toLowerCase()===(l.city||'').toLowerCase())nb={name:o.name,n:r,k:99,txt:'same city'};});
+  return nb;
+}
+function doorEntry(l){l.doors=l.doors||[];let d=doorThisWeek(l,me);if(!d){d={by:me,at:Date.now(),outcome:'pending',note:''};l.doors.push(d);}return d;}
+async function setDoor(id,outcome){
+  if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
+  if(outcome==='pending'){const d=doorThisWeek(l,me);if(d)l.doors=l.doors.filter(x=>x!==d);await saveLeads();render();return;}
+  const d=doorEntry(l);d.at=Date.now();d.outcome=outcome;
+  if(outcome==='talked'){if(l.stage<4&&l.stage!==8)l.stage=4;sfx.pt();flyPts(PTS.door+PTS.talk);toast('LOGGED · THEY’RE IN TONIGHT’S LIST');}
+  if(outcome==='ret'){sfx.tap();toast('ON THE CALLBACK LIST');}
+  if(outcome==='no'){l.deadDoor=true;sfx.tap();toast('NEXT DOOR');}
+  if(outcome==='booked'){const when=prompt('Setup call / filming day booked for? (Thu 2pm)','');if(when===null)d.outcome='talked';else{if(l.stage<5||l.stage===8)l.stage=5;l.meetingDate=when||'booked at the door';l.bookedBy=l.bookedBy||me;l.bookings=(l.bookings||0)+1;l.nextTouch='';celebrate('BOOKED AT THE DOOR','+'+(PTS.door+PTS.talk+PTS.meeting)+' PTS · '+esc(l.name).toUpperCase());}}
+  await saveLeads();checkLevelUp();render();
+}
+async function setDoorNote(id,v){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);d.note=v.trim();delete drafts['dn-'+id];await saveLeads();}
+async function setDoorDm(id){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);if(d.dm){if(!confirm('Clear the DM time?'))return;delete d.dm;}else{d.dm=Date.now();toast('DM LOGGED · SAY THE TIME AT THE DOOR');}await saveLeads();render();}
+function copyDm(){const msg='Hi! Do you have any openings this week for lip filler or Botox? And what\'s your pricing? Thank you!';if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(msg).then(()=>toast('COPIED · OPEN IG, PASTE, THEN TAP DM SENT'),()=>prompt('Copy:',msg));else prompt('Copy:',msg);}
+async function setRouteSetting(k){const v=prompt(k==='demo'?'Demo number (the AI line they text):':'Booking link (calendar URL):',routes.settings[k]||'');if(v===null)return;routes.settings[k]=v.trim();await saveRoutes();render();}
+async function setAngle(id){const l=leads.find(x=>x.id===id);if(!l)return;const v=prompt('Door angle for '+l.name+' — who decides, who guards the door, what you lead with:',l.angle||'');if(v===null)return;l.angle=v.trim();await saveLeads();render();}
+function poolDiag(t){
+  const inT=leads.filter(l=>territoryOf(l)===t),ok=inT.filter(l=>qualifies(l).ok),assigned=new Set(Object.values(routes.assign||{}).flat());
+  const un=ok.filter(l=>!assigned.has(l.id)).length,why={};
+  inT.filter(l=>!qualifies(l).ok).forEach(l=>{const w=qualifies(l).why;why[w]=(why[w]||0)+1;});
+  const other=leads.filter(l=>territoryOf(l)==='OTHER').length;
+  return t+' POOL: <b>'+inT.length+'</b> LEADS · QUALIFIED <b>'+ok.length+'</b> · UNASSIGNED <b>'+un+'</b>'+(Object.keys(why).length?'<br>NOT QUALIFIED: '+Object.keys(why).map(k=>'<span class="bad">'+esc(k)+' ×'+why[k]+'</span>').join(' · '):'')+(other?'<br><span class="bad">'+other+' LEAD'+(other===1?'':'S')+' WITH NO TERRITORY — ADD STATE OR ZIP TO THE ADDRESS</span>':'')+(ok.length<12?'<br>→ HUNT '+(t==='CHI'?'CHICAGO SUBURBS':'LA / OC')+' WITH ADDRESS + GOOGLE REVIEW COUNT (100+ ≈ $1M) TO FILL THIS ROUTE':'');
+}
+function routeHero(l,stops,who){
+  const idx=stops.indexOf(l),next=stops[idx+1],d=doorThisWeek(l,who)||{},cur=d.outcome||'pending',a=l.audit||{};
+  const dm=numOf(a.a1hrs),ig=numOf(a.a5days),rv=revEst(l),nb=neighborAmmo(l),sl=slotsFor(stops)[idx],seats=seatsLeft(territoryOf(l)),demo=routes.settings.demo||'[set the demo number]',ask=l.owner||'the owner',you=me||'Giancarlo';
+  const nav=l.lat!=null?'https://www.google.com/maps/dir/?api=1&destination='+l.lat+','+l.lng:'https://maps.google.com/?q='+encodeURIComponent(l.address||(l.name+' '+(l.city||'')));
+  const dist=next?'Next: '+esc(next.name)+((l.lat!=null&&next.lat!=null)?', '+mi(km(l,next))+' mi':''):'Last door of the day';
+  const followTxt=encodeURIComponent('Hey, it\'s '+you+' from Patheom, great meeting you today. Here\'s the number if you want to see it book you: '+demo+'. I\'ll swing back Thursday.');
+  return '<div class="rt-hero"><div class="kick">'+(cur!=='pending'?'LOGGED · '+DOOR_LABEL[cur]:'UP NEXT')+' · STOP '+(idx+1)+' OF '+stops.length+(sl?' · ARRIVE '+sl:'')+'</div>'+
+  '<div class="name"><div class="big-n">'+(idx+1)+'</div><div class="t">'+esc(l.name)+'<small>'+esc(l.address||'')+(l.city&&!(l.address||'').toLowerCase().includes(l.city.toLowerCase())?', '+esc(l.city):'')+'</small></div></div>'+
+  '<ul class="facts"><li><b>ASK FOR</b> '+esc(ask)+'</li><li><b>REVIEWS</b> '+(a.a4count?esc(a.a4count)+(a.a4stars?' · '+esc(a.a4stars)+'★':''):(l.gReviews?esc(l.gReviews)+' Google':'not counted'))+'</li><li><b>HOURS</b> '+(l.hours?esc(l.hours):'<span class="miss">not set — add in CRM</span>')+'</li><li><b>IG</b> '+(l.ig?esc(l.ig):'not set')+(dm!=null?' · DM took '+r1(dm)+'h':'')+(ig!=null?' · last post '+ig+'d ago':'')+'</li><li>'+dist+'</li></ul>'+
+  '<div class="odds"><div><b style="color:'+heatMeta(heat(l))[1]+'">'+heat(l)+'%</b><span>MEETING ODDS</span></div><div><b>'+canPay(l)+'</b><span>CAN PAY</span></div><div><b style="font-size:8px;line-height:1.5">'+revBand(rv)+'</b><span>EST. REVENUE</span></div></div>'+
+  '<div class="angle" onclick="setAngle('+l.id+')">'+(l.angle?esc(l.angle):'Tap to write the angle — who decides, who guards the door, what you lead with.')+'</div>'+
+  (nb?'<div class="nb">NEIGHBOR AMMO: '+esc(nb.name)+', '+nb.txt+', '+nb.n.toLocaleString()+' reviews. They answer.</div>':'')+
+  heatBar(l,false)+
+  '<div class="rt-row"><a class="cbtn go" href="'+nav+'" target="_blank" rel="noopener">GO</a>'+(l.phone?'<a class="cbtn" href="tel:'+digitsOf(l.phone)+'">CALL</a>':'<span class="cbtn off">CALL</span>')+(l.ig?'<a class="cbtn pink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">OPEN IG</a>':'<a class="cbtn pink" target="_blank" rel="noopener" href="https://www.instagram.com/explore/search/keyword/?q='+encodeURIComponent(l.name+' '+(l.city||''))+'">FIND IG</a>')+'</div>'+
+  '<div class="rt-row"><span class="cbtn'+(d.dm?' go':'')+'" onclick="setDoorDm('+l.id+')">'+(d.dm?'DM’D '+timeStr(d.dm):'DM SENT')+'</span><span class="cbtn" onclick="copyDm()">COPY DM</span>'+(routes.settings.demo?'<a class="cbtn" href="sms:'+digitsOf(routes.settings.demo)+'">TEXT DEMO</a>':'<span class="cbtn off">TEXT DEMO</span>')+'</div>'+
+  '<div class="rt-row">'+(l.cell?'<a class="cbtn" href="sms:'+digitsOf(l.cell)+'?&body='+followTxt+'">TEXT OWNER</a>':'<span class="cbtn off">TEXT OWNER</span>')+(routes.settings.book?'<a class="cbtn" target="_blank" rel="noopener" href="'+esc(routes.settings.book)+'">BOOK</a>':'<span class="cbtn off">BOOK</span>')+'<span class="cbtn" onclick="crmId='+l.id+';crmView=\'profiles\';go(\'crm\')">CRM</span></div>'+
+  '<details class="script"><summary>DOOR SCRIPT · THIS STOP</summary><div class="scr">'+
+  '<p><b>DESK.</b> “Hey, how’s it going? I’m '+esc(you)+', we’re a local company. Is '+esc(ask)+' around?”</p>'+
+  '<p><b>OWNER.</b> “Thanks. '+esc(you)+', Patheom, we’re local. Not selling anything today. Two things we found.'+(ig!=null?' Your last post was '+ig+' days ago.':'')+(d.dm?' And we DM’d you at '+timeStr(d.dm)+' as a patient asking about lip filler, still nothing.':(dm!=null?' We DM’d you as a patient about lip filler and it took '+r1(dm)+' hours to hear back.':' And we DM’d you as a patient asking about lip filler.'))+' The page and the inbox just aren’t covered.”</p>'+
+  '<p>“Who’s doing your social right now, is that you?”</p>'+
+  '<p>“'+(nb?esc(nb.name)+' posts four times a week and has '+nb.n.toLocaleString()+' reviews.':'The big practice down the street posts four times a week.')+' You’re the better practice and nobody’s seeing it. When’s the last time anyone here had an hour to film?”</p>'+
+  '<p>“One hour a month. We show up with the scripts, you talk to a phone, we leave. Twelve posts, edited and posted, three a week, in your voice. Every DM those posts bring in answered in under a minute, day or night, with your prices, booked to your calendar. A 15-minute setup call and one hour on camera. That’s the whole ask.”</p>'+
+  '<p>“Here’s what the posts look like.” (three clips) “Here’s what happens when someone DMs. Text this number.” ('+esc(demo)+')</p>'+
+  '<p>“We’re picking three pilot practices in '+esc(l.city||'the area')+'. Thirty days, free, no card. We film you week one, posts go up, inbox gets answered, day 30 your numbers decide. If it did nothing we shut it off. Want to be one of the three?”</p>'+
+  '<p>“Setup call is 15 minutes. Filming’s an hour at your place whenever it’s dead. Tomorrow at 10 or Thursday at 2?”</p>'+
+  '<p><b>HOW MUCH.</b> “Nothing for 30 days. After that $3,500 a month, and you decide with your numbers in front of you. First three practices here get it at $2,000'+(seats<3?' — '+seats+' left':'')+'.”</p>'+
+  '<p><b>HAVE SOMEONE.</b> “Great. What are they posting and what’s it booking? This is the part they’re not doing: the DMs at 9pm and the scripts.”</p>'+
+  '<p><b>SEND INFO.</b> “Sure, best email? Is that you or someone else? Can I put 15 minutes on your calendar Thursday?”</p>'+
+  '<p><b>OWNER OUT.</b> “When is she usually here? And your name? Who’s running your Instagram right now? Best name to ask for Thursday?”</p>'+
+  '</div></details>'+
+  '<div class="status">'+['pending','talked','booked','ret','no'].map(k=>'<button class="'+(cur===k?'on-'+k:'')+'" onclick="setDoor('+l.id+',\''+k+'\')">'+DOOR_LABEL[k]+'</button>').join('')+'</div>'+
+  '<input id="dn-'+l.id+'" placeholder="Who you talked to, what they said, when to come back" value="'+esc(d.note||'')+'" onchange="setDoorNote('+l.id+',this.value)" style="margin-top:8px">'+
+  '<input id="pf-'+l.id+'-cell" placeholder="Owner or manager cell (turns on TEXT OWNER)" inputmode="tel" value="'+esc(l.cell||'')+'" onchange="setField('+l.id+',\'cell\',this.value)" style="margin-top:8px">'+
+  '</div>';
+}
+function viewRoute(){
+  const who=routeUser||(QUOTA[me]?me:'Giancarlo'),q=QUOTA[who];
+  const ids=(routes.assign&&routes.assign[who])||[],stops=ids.map(id=>leads.find(l=>l.id===id)).filter(Boolean);
+  let html='<h2>DOOR ROUTE</h2><div class="sub-h">Built automatically every Friday from qualified leads — est. $1M+/yr, address on file, zero duplicates across the four of you. Knock, log it, text them tonight.</div>';
+  html+='<div class="seg">'+FOUNDERS.map(f=>'<div class="'+(who===f?'on':'')+'" onclick="routeUser=\''+f+'\';routeFocus=null;render()"'+(who===f?'':' style="color:'+P[f].hex+'"')+'>'+P[f].n+' '+f.toUpperCase().slice(0,5)+'<br>'+((routes.assign&&routes.assign[f])||[]).length+'/'+QUOTA[f].n+'</div>').join('')+'</div>';
+  const dd=stops.map(l=>doorThisWeek(l,who)).filter(Boolean);
+  const done=dd.filter(d=>d.outcome!=='pending').length,talk=dd.filter(d=>['talked','booked','ret'].includes(d.outcome)).length,bk=dd.filter(d=>d.outcome==='booked').length,dms=dd.filter(d=>d.dm).length;
+  const kpi=(v,t,lbl)=>'<div class="'+(t&&v>=t?'hit':'')+'"><b>'+v+'<i>/'+t+'</i></b><span>'+lbl+'</span></div>';
+  html+='<div class="rt-kpi">'+kpi(done,stops.length,'DOORS')+kpi(talk,Math.max(1,Math.round(stops.length*.3)),'OWNER TALKS')+kpi(bk,1,'PILOTS BOOKED')+kpi(dms,stops.length,'DMS SENT')+'</div>';
+  html+='<div class="pool">WEEK OF <b>'+(routes.week||routeWeekKey())+'</b> · '+q.lbl+' · <b>'+q.n+'</b> DOORS/WK · NEXT BUILD FRI '+nextFridayStr().toUpperCase()+'</div>';
+  if(!stops.length){
+    html+='<div class="empty" style="margin-top:12px;text-align:left"><span class="px" style="text-align:center">NO ROUTE FOR '+who.toUpperCase()+' THIS WEEK</span><div class="pool" style="margin:0">'+poolDiag(q.t)+'</div></div>';
+  }else{
+    const f=stops.find(l=>l.id===routeFocus)||stops.find(l=>{const d=doorThisWeek(l,who);return !d||d.outcome==='pending';})||stops[0];
+    html+='<div id="rt-map"><div style="position:absolute;left:8px;bottom:8px;z-index:400;font-family:\'Press Start 2P\';font-size:5.5px;color:var(--dim);background:rgba(7,5,18,.85);padding:4px 7px;border:2px solid var(--line)">'+stops.filter(l=>l.lat!=null).length+'/'+stops.length+' PINNED · TAP A PIN</div></div>';
+    html+=routeHero(f,stops,who);
+    const sl=slotsFor(stops);
+    html+='<div class="hs">'+stops.map((l,i)=>{const d=doorThisWeek(l,who),k=d?d.outcome:'pending';return '<div class="rt-stop '+(k!=='pending'?k:'')+(f.id===l.id?' focus':'')+'" onclick="routeFocus='+l.id+';render();var h=document.querySelector(\'.rt-hero\');if(h)h.scrollIntoView({behavior:\'smooth\',block:\'start\'})"><div class="n">'+(i+1)+'</div><div class="b"><div class="nm">'+esc(l.name)+'</div><div class="meta">'+sl[i]+' · '+esc(l.city)+' · '+heat(l)+'% · '+canPay(l)+(l.owner?' · '+esc(l.owner):'')+(d&&d.dm?' · DM '+timeStr(d.dm):'')+'</div></div>'+(k!=='pending'?'<span class="pill">'+DOOR_LABEL[k]+'</span>':'')+'</div>';}).join('')+'</div>';
+    const today=new Date().toDateString();
+    const touched=stops.filter(l=>{const d=doorThisWeek(l,who);return d&&['talked','booked','ret'].includes(d.outcome)&&new Date(d.at).toDateString()===today;});
+    if(touched.length){html+='<label>TONIGHT · TEXT + DM THESE '+touched.length+'</label>';touched.forEach(l=>{const d=doorThisWeek(l,who);const body=encodeURIComponent('Hey, it\'s '+(me||'Giancarlo')+' from Patheom, great meeting you today. Here\'s the number if you want to see it book you: '+(routes.settings.demo||'[demo number]')+'.');html+='<div class="cb-row"><div class="b"><b>'+esc(l.name)+'</b><span>'+esc(l.owner||'')+(d.note?' · '+esc(d.note):'')+'</span></div>'+(l.cell?'<a href="sms:'+digitsOf(l.cell)+'?&body='+body+'">TEXT</a>':'')+(l.ig?'<a target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">DM</a>':'')+(l.phone?'<a href="tel:'+digitsOf(l.phone)+'">CALL</a>':'')+'</div>';});}
+    const cbs=leads.filter(l=>{const d=lastDoor(l);return d&&d.by===who&&d.outcome==='ret';});
+    if(cbs.length){html+='<label>CALLBACKS · '+cbs.length+'</label>';cbs.forEach(l=>{const d=lastDoor(l);html+='<div class="cb-row"><div class="b"><b>'+esc(l.name)+'</b><span>'+esc(l.owner||'')+(d.note?' · '+esc(d.note):'')+'</span></div>'+(l.phone?'<a href="tel:'+digitsOf(l.phone)+'">CALL</a>':'')+'<a href="#" onclick="event.preventDefault();crmId='+l.id+';crmView=\'profiles\';go(\'crm\')">CRM</a></div>';});}
+    const legs=[];for(let i=0;i<stops.length;i+=10)legs.push(stops.slice(i,i+10));
+    html+='<div class="act-row" style="margin-top:14px">'+legs.map((lg,i)=>'<a class="btn gold" style="text-decoration:none;text-align:center;margin-top:0" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/'+lg.map(l=>encodeURIComponent(l.lat!=null?l.lat+','+l.lng:(l.address||l.name))).join('/')+'">GOOGLE MAPS · STOPS '+(i*10+1)+'–'+(i*10+lg.length)+'</a>').join('')+'</div>';
+    html+='<div class="pool" style="margin-top:12px">'+poolDiag(q.t)+'</div>';
+  }
+  const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000)).length;
+  html+='<div class="act-row" style="margin-top:12px">'+(pend?'<button class="btn ghost" onclick="geocodePending()">'+(geoBusy?'MAPPING…':'MAP '+pend+' ADDRESSES')+'</button>':'')+'<button class="btn ghost" onclick="regenRoutes()">REBUILD ROUTES</button><button class="btn ghost" onclick="exportRoute()">EXPORT ROUTE</button><button class="btn ghost" onclick="setRouteSetting(\'demo\')">'+(routes.settings.demo?'DEMO: '+esc(routes.settings.demo):'SET DEMO NUMBER')+'</button><button class="btn ghost" onclick="setRouteSetting(\'book\')">'+(routes.settings.book?'BOOKING LINK ✓':'SET BOOKING LINK')+'</button></div>';
+  return html;
+}
+function exportRoute(){
+  const who=routeUser||(QUOTA[me]?me:'Giancarlo'),ids=(routes.assign&&routes.assign[who])||[],stops=ids.map(id=>leads.find(l=>l.id===id)).filter(Boolean);
+  if(!stops.length){toast('NO ROUTE');return;}
+  const lines=[who.toUpperCase()+' · '+QUOTA[who].lbl+' · WEEK OF '+routes.week];
+  stops.forEach((l,i)=>{const d=doorThisWeek(l,who);lines.push((i+1)+'. '+l.name+' — '+(l.address||'')+(l.owner?' — ask '+l.owner:'')+' — '+DOOR_LABEL[d?d.outcome:'pending']+(d&&d.dm?' — DM '+timeStr(d.dm):'')+(l.cell?' — cell '+l.cell:'')+(d&&d.note?' — '+d.note:''));});
+  const txt=lines.join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>toast('ROUTE COPIED'),()=>prompt('Copy:',txt));else prompt('Copy:',txt);
+}
+function initRouteMap(){
+  const el=document.getElementById('rt-map');if(!el)return;
+  if(rtMap){try{rtMap.remove();}catch(e){}rtMap=null;}
+  if(typeof L==='undefined'){el.insertAdjacentHTML('beforeend','<div style="position:absolute;inset:0;display:grid;place-items:center;font-family:\'Press Start 2P\';font-size:7px;color:var(--dim)">MAP NEEDS INTERNET · LIST STILL WORKS</div>');return;}
+  const who=routeUser||(QUOTA[me]?me:'Giancarlo'),ids=(routes.assign&&routes.assign[who])||[],all=ids.map(id=>leads.find(l=>l.id===id)).filter(Boolean),stops=all.filter(l=>l.lat!=null);
+  rtMap=L.map('rt-map',{zoomControl:false,attributionControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(rtMap);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:19,opacity:.7}).addTo(rtMap);
+  if(!stops.length){rtMap.setView(QUOTA[who].t==='LA'?[33.8,-118.1]:[41.85,-87.9],9);return;}
+  const f=all.find(l=>l.id===routeFocus);
+  stops.forEach(l=>{const i=all.indexOf(l),d=doorThisWeek(l,who),k=d?d.outcome:'pending';const cls='num-pin'+(['talked','booked','ret'].includes(k)?' done':k==='no'?' no':'')+(f&&f.id===l.id?' focus':'');
+    const m=L.marker([l.lat,l.lng],{icon:L.divIcon({className:'',html:'<div class="'+cls+'">'+(i+1)+'</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(rtMap);
+    m.on('click',()=>{routeFocus=l.id;render();});});
+  if(stops.length>1)L.polyline(stops.map(l=>[l.lat,l.lng]),{color:'#FFD34D',weight:2.5,opacity:.85,dashArray:'1 7',lineCap:'round'}).addTo(rtMap);
+  if(f&&f.lat!=null)rtMap.setView([f.lat,f.lng],12);else rtMap.fitBounds(stops.map(l=>[l.lat,l.lng]),{padding:[30,30]});
 }
 
 /* ============ BREAK ROOM: DOUBLES PONG (Supabase Realtime, live 2v2) ============ */
@@ -1182,16 +1802,18 @@ function safeRender(){if(!typing()&&!document.getElementById('m-bg'))render();}
 (async function(){
   trackDrafts();
   document.addEventListener('pointerdown',e=>{lastTap={x:e.clientX,y:e.clientY};},true);
-  await loadMe();await loadLeads();render();
+  await loadMe();await loadLeads();await ensureRoutes();render();
   if(me)myPts=score()[me].pts;
   if(!me)openSelect();
+  const snap=()=>JSON.stringify(leads)+'|'+routes.week+'|'+JSON.stringify(routes.settings||{});
   setInterval(async()=>{
     if(tab==='game')return; /* arcade is realtime; never repaint over a live match */
-    await loadLeads();safeRender();
+    const before=snap();await loadLeads();await ensureRoutes();
+    if(snap()!==before)safeRender();
   },25000);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden||tab==='game')return;
-    loadLeads().then(safeRender);
+    const before=snap();loadLeads().then(ensureRoutes).then(()=>{if(snap()!==before)safeRender();});
   });
 })();
 </script>
