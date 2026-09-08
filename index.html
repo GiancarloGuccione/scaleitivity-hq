@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SCALEITIVITY ARCADE</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -270,7 +270,8 @@ body.gaming .logo{animation:none}
 
 /* ============ V9: PATHEOM CRM · ROUTE · DEAL HEAT ============ */
 .st9{color:#141414;background:var(--p2);border-color:var(--p2)}
-.nav-btn{font-size:5.5px}
+.nav-btn{font-size:6px;padding-left:0;padding-right:0}
+.gate .sub{flex-wrap:wrap;gap:4px 10px;font-size:6px;line-height:1.8}
 .act-row{flex-wrap:wrap}.act-row .btn{flex:1 1 30%}
 .seats{flex-wrap:wrap}
 .seat-row{display:flex;gap:6px;width:100%;align-items:center}
@@ -875,7 +876,9 @@ async function logDial(id){
 async function setTouch(id){
   const l=leads.find(x=>x.id===id);if(!l)return;
   const d=prompt('Follow up when? (YYYY-MM-DD)',new Date(Date.now()+2*86400000).toISOString().slice(0,10));
-  if(!d)return;l.nextTouch=d;logEv(l,'Follow-up set for '+d);await saveLeads();toast('FOLLOW-UP SET');render();
+  if(d===null)return;const v=d.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)||isNaN(new Date(v+'T12:00:00').getTime())){toast('FOLLOW-UP DATE MUST BE YYYY-MM-DD');return;}
+  l.nextTouch=v;logEv(l,'Follow-up set for '+v);await saveLeads();toast('FOLLOW-UP SET · '+v);render();
 }
 async function markContacted(id){const l=leads.find(x=>x.id===id);if(!l)return;setStage(l,4);sfx.tap();await saveLeads();render();}
 async function bookMeeting(id){if(needMe())return;const d=prompt('Setup call date and time? (Thu, 2pm)');if(!d)return;const l=leads.find(x=>x.id===id);if(!l)return;if(l.stage<5||l.stage===8)l.stage=5;l.meetingDate=d;l.bookedBy=l.bookedBy||me;l.bookings=(l.bookings||0)+1;l.nextTouch='';logEv(l,'Setup call booked · '+d);await saveLeads();ptToast(PTS.meeting,'Setup call: '+l.name);celebrate('SETUP CALL BOOKED','+'+PTS.meeting+' PTS · '+esc(l.name).toUpperCase());checkLevelUp();render();}
