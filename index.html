@@ -448,8 +448,9 @@ const OFFER={machine:3500,engine:6000,founding:2000,setup:1500,addLocShared:2000
 const ROUTES_KEY='scaleitivity-routes-v1';
 const QUOTA={Giancarlo:{n:25,t:'CHI',pref:'burbs',lbl:'CHI SUBURBS'},Kon:{n:25,t:'CHI',pref:'burbs',lbl:'CHI SUBURBS'},Chandler:{n:7,t:'CHI',pref:'city',lbl:'CHICAGO'},Fein:{n:15,t:'LA',pref:'any',lbl:'LA AREA'}};
 const QUALIFY_MIN=1000000,REV_PER_REVIEW=10000;
-const CHI_CITIES=['chicago','naperville','schaumburg','oak brook','oakbrook','hinsdale','evanston','wilmette','northbrook','glenview','arlington heights','downers grove','orland park','elmhurst','lombard','wheaton','barrington','highland park','skokie','park ridge','des plaines','oak park','burr ridge','western springs','la grange','buffalo grove','deerfield','libertyville','vernon hills','geneva','st. charles','st charles','bolingbrook','plainfield','joliet','tinley park','frankfort','mokena','new lenox','homer glen','lemont','willowbrook','westmont','clarendon hills','glen ellyn','winnetka','kenilworth','lincolnshire','long grove','inverness','palatine','hoffman estates','elk grove','mount prospect','wheeling','prospect heights','niles','morton grove','lincolnwood','lisle','warrenville','batavia','elgin','crystal lake','algonquin','lake zurich','mundelein','gurnee','glencoe','river forest','elmwood park','berwyn','oak lawn','evergreen park','palos','naperville','hinsdale'];
-const LA_CITIES=['los angeles','newport beach','irvine','costa mesa','torrance','anaheim','tustin','santa ana','huntington beach','laguna','mission viejo','long beach','pasadena','burbank','glendale','sherman oaks','studio city','encino','woodland hills','calabasas','beverly hills','santa monica','west hollywood','culver city','manhattan beach','redondo beach','hermosa beach','fullerton','brea','yorba linda','aliso viejo','dana point','san clemente','san juan capistrano','rancho santa margarita','fountain valley','garden grove','cypress','seal beach','la habra','placentia','corona del mar','tarzana','toluca lake','marina del rey','venice','malibu','thousand oaks','westlake village','orange'];
+const CHI_CITIES=['chicago','naperville','schaumburg','oak brook','oakbrook','hinsdale','evanston','wilmette','northbrook','glenview','arlington heights','downers grove','orland park','elmhurst','lombard','wheaton','barrington','skokie','park ridge','des plaines','burr ridge','western springs','la grange','buffalo grove','deerfield','libertyville','vernon hills','geneva','st. charles','st charles','bolingbrook','plainfield','joliet','tinley park','frankfort','mokena','new lenox','homer glen','lemont','willowbrook','westmont','clarendon hills','glen ellyn','winnetka','kenilworth','lincolnshire','long grove','inverness','palatine','hoffman estates','elk grove','mount prospect','wheeling','prospect heights','niles','morton grove','lincolnwood','lisle','warrenville','batavia','elgin','crystal lake','algonquin','lake zurich','mundelein','gurnee','glencoe','river forest','elmwood park','berwyn','oak lawn','evergreen park','palos','naperville','hinsdale'];
+const LA_CITIES=['los angeles','newport beach','irvine','costa mesa','torrance','anaheim','tustin','santa ana','huntington beach','laguna','mission viejo','long beach','pasadena','sherman oaks','studio city','encino','woodland hills','calabasas','beverly hills','santa monica','west hollywood','culver city','manhattan beach','redondo beach','hermosa beach','fullerton','brea','yorba linda','aliso viejo','dana point','san clemente','san juan capistrano','rancho santa margarita','fountain valley','garden grove','cypress','seal beach','la habra','placentia','corona del mar','tarzana','toluca lake','marina del rey','venice','malibu','thousand oaks','westlake village','orange'];
+const AMBIG_CITIES=['lake forest','palos verdes','rancho palos verdes','glendale heights'];
 const DOOR_LABEL={pending:'NOT YET',talked:'TALKED',booked:'BOOKED',ret:'RETURN',no:'NO'};
 const PROOF=[['filmed','Filmed week one (60-min filming day done)'],['posts','Posts live — 3 a week, in their voice'],['inbox','Inbox answered in under 60 seconds'],['consults','Consults booked by the machine']];
 let leads=[],me=null,tab='board',filter=0,shopId=null,leadsLoaded=false;
@@ -712,7 +713,7 @@ function cardHTML(l){
   '<div class="stage-pill '+STAGES[l.stage].c+'">'+STAGES[l.stage].n+'</div></div>'+
   (l.ammo?'<div class="ammo">▶ '+esc(l.ammo)+'</div>':'')+
   '<div class="meta">'+(P[l.addedBy]?P[l.addedBy].n+' '+esc(l.addedBy):esc(l.addedBy))+(ac>0&&ac<5?' · AUDIT '+ac+'/5':'')+(l.meetingDate?' · '+esc(l.meetingDate):'')+(l.mrr?' · $'+(+l.mrr).toLocaleString()+'/mo':'')+
-  (l.address?'<br>📍 '+esc(l.address):' · <span class="miss">NO ADDRESS — TAP TO ADD</span>')+(reviewsOf(l)==null&&l.stage!==7?' · <span class="miss" style="color:var(--p3)">NO REVIEWS # — TAP TO ADD</span>':'')+'</div>'+
+  (l.address?'<br>📍 '+esc(l.address)+(territoryOf(l)==='OTHER'?' · <span class="miss">NO STATE/ZIP — ROUTES CAN’T PLACE IT</span>':''):' · <span class="miss">NO ADDRESS — TAP TO ADD</span>')+(reviewsOf(l)==null&&l.stage!==7?' · <span class="miss" style="color:var(--p3)">NO REVIEWS # — TAP TO ADD</span>':'')+'</div>'+
   (l.stage!==6&&l.stage!==7?heatBar(l,false):'')+
   d30Chip(l)+'</div>';
 }
@@ -1102,7 +1103,8 @@ function territoryOf(l){
   if(/\bil\b|illinois|\b60\d{3}\b/.test(a))return 'CHI';
   if(/\bca\b|california|\b9[0-6]\d{3}\b/.test(a))return 'LA';
   const rx=c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const hitCity=(list,s)=>list.some(c=>new RegExp('(^|[^a-z])'+rx(c)+'([^a-z]|$)').test(s));
+  if(AMBIG_CITIES.includes(city))return 'OTHER'; /* exists in both states — needs state or zip */
+  const hitCity=(list,s)=>list.includes(s)||list.some(c=>new RegExp('^'+rx(c)+'([^a-z]|$)').test(s));
   /* in a free-text address a city name only counts when it sits where a city sits: before a comma, a state, a zip, or the end */
   const hitAddr=(list,s)=>list.some(c=>new RegExp('(^|[^a-z])'+rx(c)+'\\s*(,|\\b(ca|il|california|illinois)\\b|\\d{5}|$)').test(s));
   if(city){if(hitCity(CHI_CITIES,city))return 'CHI';if(hitCity(LA_CITIES,city))return 'LA';}
@@ -1460,7 +1462,7 @@ function neighborAmmo(l){
 function doorEntry(l){l.doors=l.doors||[];let d=doorThisWeek(l,me);if(!d){d={by:me,at:Date.now(),outcome:'pending',note:''};l.doors.push(d);}return d;}
 async function setDoor(id,outcome){
   if(needMe())return;const l=leads.find(x=>x.id===id);if(!l)return;
-  if(outcome==='pending'){const d=doorThisWeek(l,me);if(d)l.doors=l.doors.filter(x=>x!==d);await saveLeads();render();return;}
+  if(outcome==='pending'){const d=doorThisWeek(l,me);if(d)l.doors=l.doors.filter(x=>x!==d);delete l.deadDoor;delete l.deadDoorAt;await saveLeads();render();return;}
   const d=doorEntry(l);d.at=Date.now();d.outcome=outcome;
   if(outcome==='talked'){if(l.stage<4&&l.stage!==8)l.stage=4;sfx.pt();flyPts(PTS.door+PTS.talk);toast('LOGGED · THEY’RE IN TONIGHT’S LIST');}
   if(outcome==='ret'){sfx.tap();toast('ON THE CALLBACK LIST');}
