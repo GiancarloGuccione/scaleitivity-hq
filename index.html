@@ -334,6 +334,7 @@ body.gaming .logo{animation:none}
 .rt-kpi div.hit b{color:var(--gold)}
 #rt-map{height:38vh;min-height:230px;background:#070512;border:3px solid var(--line);position:relative;z-index:1;margin:8px 0 10px}
 .leaflet-container{background:#070512;font-family:'Outfit'}
+.osm-dark{filter:invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.5)}
 .leaflet-control-attribution{background:rgba(7,5,18,.7)!important;color:var(--dim)!important;font-size:8px!important}
 .leaflet-control-attribution a{color:var(--dim)!important}
 .num-pin{width:26px;height:26px;background:var(--gold);color:#141414;font-family:'Press Start 2P';font-size:9px;line-height:26px;text-align:center;border:2px solid #000;box-shadow:0 0 0 2px rgba(255,211,77,.3),0 4px 12px rgba(0,0,0,.7)}
@@ -673,8 +674,7 @@ function render(){
   if(tab==='score')m.innerHTML=viewScore();
   if(tab==='route'){
     m.innerHTML=viewRoute();restoreDrafts();setTimeout(initRouteMap,0);
-    const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000)).length;
-    if(pend&&!geoBusy)geocodePending();
+    if(geoPendingList().length&&!geoBusy)geocodePending();
     return;
   }
   restoreDrafts();
@@ -821,7 +821,7 @@ function closeCard(l,btns){
   '<div>'+rdBadge(l,true)+'</div>'+
   (l.ammo?'<div class="am">\u201c'+esc(l.ammo)+'\u201d</div>':'')+
   '<div class="contact">'+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> · ':'')+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> · ':'')+esc(l.city)+
-  ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · ZOOM: '+esc(l.meetingDate):'')+
+  ' · DIALS: '+((l.dials||[]).length)+(l.nextTouch&&!od?' · next: '+esc(l.nextTouch):'')+(l.meetingDate?' · MEETING: '+esc(l.meetingDate):'')+
   (l.address?'<br>📍 <a class="clink" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">'+esc(l.address)+'</a>':'')+'</div>'+
   heatBar(l,false)+
   '<div class="mv-inline" onclick="crmId='+l.id+';crmView=\'profiles\';go(\'crm\')" style="cursor:pointer">▶ NEXT: '+nextMove(l).t+' <span style="color:var(--dim);font-weight:400">· tap for the script</span></div>'+
@@ -879,8 +879,8 @@ function winLead(id){
   const opt=(tier,cls,label,sub,mrr,res)=>'<button class="btn '+cls+'" style="margin-top:10px" onclick="confirmWin('+id+',\''+tier+'\','+mrr+',\''+res+'\')">'+label+'<br><span style="font-size:7px;opacity:.85;font-weight:400;line-height:1.7">'+sub+'</span></button>';
   bg.innerHTML='<div class="modal"><h3>'+esc(l.name)+' SIGNED — WHICH DEAL?</h3><div class="m-city">PATHEOM · 6-month agreement after the pilot · $1,500 setup, waived when they sign within 7 days · every message answered in under 60 seconds or that month is free.</div>'+
     (seats>0?opt('Founding','gold','FOUNDING · $2,000/MO','First three practices in '+(t==='CHI'?'Chicago':t==='LA'?'LA':'each city')+' — case study + 90 seconds of the doctor on camera · '+seats+' seat'+(seats>1?'s':'')+' left · ends at client three','2000','Won Founding'):'<div class="pool" style="margin-top:10px">FOUNDING SEATS IN '+t+': <span class="bad">SOLD OUT</span></div>')+
-    opt('Machine','mint','THE MACHINE · $3,500/MO','Answered · Booked · Posted — 12 videos from one filming day, DMs/texts/missed calls answered in under a minute, dormant patients texted back','3500','Won Standard')+
-    opt('Engine','mint','THE ENGINE · $6,000/MO','Everything in The Machine + 24 videos on two platforms, named offer with ads, quarterly reactivation, rebooking texts, weekly report, 24-hour priority','6000','Won Standard')+
+    opt('Machine','mint','THE MACHINE · $3,500/MO','Answered (every DM, text, web message under a minute; missed calls texted back) · Booked (AI qualifies, holds a time, follows up once, hands off) · Posted (12 videos from one filming day) · dormant patients texted back · monthly 5-number report','3500','Won Standard')+
+    opt('Engine','mint','THE ENGINE · $6,000/MO','Everything in The Machine + 24 videos from two filming days on a second platform, a named offer with ads run on their budget, quarterly reactivation, rebooking texts, weekly report + 20-min monthly call, 24-hour priority','6000','Won Standard')+
     '<div class="pool" style="margin-top:10px">EXTRA LOCATIONS: +$2,000/MO SHARED PROVIDERS & CONTENT · +$3,500/MO WITH ITS OWN FILMING DAY — ADD TO THE RETAINER ON THE NEXT SCREEN</div>'+
     '<button class="btn ghost" onclick="document.getElementById(\'w-bg\').remove()">CANCEL</button></div>';
   document.body.appendChild(bg);
@@ -956,7 +956,7 @@ function viewScore(){
   '<div class="stat"><div class="v">'+r1(it.formAvg)+(it.formAvg!=null?'h':'')+'</div><div class="k">Avg web form reply</div></div>'+
   '<div class="stat"><div class="v">'+r1(it.igAvg)+(it.igAvg!=null?'d':'')+'</div><div class="k">Avg IG silence</div></div>'+
   '<div class="stat"><div class="v">'+r1(it.revAvg)+'</div><div class="k">Avg Google reviews</div></div>'+
-  '<div class="stat"><div class="v" style="color:var(--gold)">$'+mrrT.toLocaleString()+'</div><div class="k">Machine MRR /mo</div></div>'+
+  '<div class="stat"><div class="v" style="color:var(--gold)">$'+mrrT.toLocaleString()+'</div><div class="k">Total MRR /mo</div></div>'+
   '</div>'+
   (it.n?'<button class="btn gold" onclick="copyIntel()">COPY PITCH STAT LINE</button>':'');
   const src=sourceStats();
@@ -1078,7 +1078,7 @@ function viewIntel(){
 function exportIntel(){
   const A=leads.filter(l=>auditCount(l)>0).sort((a,b)=>readiness(b)-readiness(a));
   if(!A.length){toast('DATABASE EMPTY');return;}
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const q=v=>{let t=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
   const rows=[['Name','Address','Mail-ready','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
   A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',(l.address&&l.ammo)?'YES':(l.address?'NO AMMO':'NO ADDRESS'),l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
@@ -1112,6 +1112,7 @@ function qualifies(l){
   return {ok:true,why:'EST '+revBand(v)};
 }
 function seatsLeft(t){return Math.max(0,OFFER.seatsPerCity-leads.filter(l=>l.stage===6&&l.result==='Won Founding'&&territoryOf(l)===t).length);}
+function marketName(l){const t=territoryOf(l);return t==='CHI'?'Chicago':t==='LA'?'LA':(l.city||'your area');}
 
 /* ============ DUPLICATE GUARD (app-wide) ============ */
 function normName(s){return (s||'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9 ]/g,' ').replace(/\b(the|med|medical|spa|medspa|aesthetics?|aesthetic|clinic|center|centre|llc|inc|and|of|skin|care|wellness|beauty|md|dr)\b/g,' ').replace(/\s+/g,' ').trim();}
@@ -1243,19 +1244,19 @@ function nextMove(l){
   const dmLine=dm!=null?'I DM’d your practice as a patient asking about lip filler and it took '+r1(dm)+' hours to hear back.':'I DM’d your practice as a patient and timed the reply.';
   const igLine=ig!=null?' Your last Instagram post was '+ig+' days ago.':'';
   const offer='Thirty days, free, no card, no contract. We film you week one, posts go up, the inbox gets answered in under a minute — day 30 your own numbers decide.';
-  if(l.stage===6)return {k:'SIGNED · COMPOUND IT',t:'Ask for the case study and two intros this week',w:'Founding terms bought a case study and 90 seconds of the doctor on camera. Cash both in inside week one, while the win is loudest. Referrals at peak satisfaction convert 3× cold.',s:'“Who are two practice owners you respect with the same 9pm DM problem? I’ll secret-shop them first and bring their numbers, exactly like I did for you.”',p:'HORMOZI · ASK AT PEAK SATISFACTION · CIALDINI · RECIPROCITY',acts:[A('ADD NOTE',"crmId="+l.id+";crmView='profiles';go('crm')")]};
+  if(l.stage===6){const fd=l.result==='Won Founding';return {k:'SIGNED · COMPOUND IT',t:fd?'Collect the case study, the 90 seconds on camera, and two intros':'Ask for two intros this week',w:(fd?'Founding terms bought a case study and 90 seconds of the doctor on camera — collect both inside week one, while the win is loudest. ':'')+'Referrals asked at peak satisfaction convert far better than cold. Ask now, not at month three.',s:'“Who are two practice owners you respect with the same 9pm DM problem? I’ll secret-shop them first and bring their numbers, exactly like I did for you.”',p:'HORMOZI · ASK AT PEAK SATISFACTION · CIALDINI · RECIPROCITY',acts:[A('ADD NOTE',"crmId="+l.id+";crmView='profiles';go('crm')")]};}
   if(l.stage===7)return {k:'LOST · LEAVE THE DOOR OPEN',t:'One message, no chase',w:'Chasing a lost deal lowers your status. One clean line that makes returning easy, then silence.',s:'“Totally understand. I’ll leave the report with you. If the 9pm DMs ever become a problem, the 30-day pilot is still free.”',p:'VOSS · REMOVE PRESSURE = REMOVE RESISTANCE',acts:[A('BACK TO NURTURE',"reviveToNurture("+l.id+")")]};
-  if(l.stage===8)return {k:'NURTURE · RE-OPEN WITH NEW EVIDENCE',t:'Re-shop them, then return with a fresh number',w:'Nobody responds to the same pitch twice. They respond to new proof. A second secret shop gives you a brand-new opener and shows you never stopped watching.',s:'“Quick one — I shopped you again last week. Still '+(dm!=null?r1(dm)+' hours':'a full day')+' to answer a filler DM. Want to see what changed at the practices that fixed it?”',p:'CHALLENGER · TEACH SOMETHING NEW',acts:[A('REVIVE → READY',"reviveLead("+l.id+")"),A('EDIT AUDIT',"shopId="+l.id+";go('shop')")]};
+  if(l.stage===8)return {k:'NURTURE · RE-OPEN WITH NEW EVIDENCE',t:'Re-shop them first, then return with a fresh number',w:'Nobody responds to the same pitch twice. They respond to new proof. Run the secret shop again (EDIT AUDIT), then open with the new number — it shows you never stopped watching.',s:'“Quick one — I shopped you again this week. Still [new number] to answer a filler DM. Want to see what a practice looks like when every DM gets answered in under a minute?”',p:'CHALLENGER · TEACH SOMETHING NEW',acts:[A('EDIT AUDIT',"shopId="+l.id+";go('shop')"),A('REVIVE → READY',"reviveLead("+l.id+")")]};
   if(l.stage<=2)return {k:'PROOF BEFORE PITCH',t:'Finish the secret shop — the audit IS the pitch',w:'Nobody argues with their own numbers. Every empty test is a missing line in the report you’ll mail them. '+(auditCount(l)<5?(5-auditCount(l))+' test'+(5-auditCount(l)===1?'':'s')+' left.':'Write the ammo line.'),s:'The ammo line = their three worst numbers in one sentence: “26 hrs to answer a filler DM, no text back at lunch, 47 reviews vs the practice down the street at 210.”',p:'HORMOZI · LEAD WITH VALUE, EARN THE ASK',acts:[A('OPEN AUDIT',"shopId="+l.id+";go('shop')")]};
   if(od&&l.stage!==9)return {k:'OVERDUE · SPEED TO LEAD CUTS BOTH WAYS',t:'Touch them today with a no-oriented question',w:'You sell response time. A stale follow-up from you kills the frame. Make “no” the easy answer — people answer “no” questions fast, and a no here reopens the door.',s:'“Have you given up on fixing the 9pm DM problem?” — then stop talking.',p:'VOSS · NO-ORIENTED QUESTION · HORMOZI · THE FORTUNE IS IN THE FOLLOW-UP',acts:[A('+1 DIAL',"logDial("+l.id+")"),A('FOLLOW-UP',"setTouch("+l.id+")")]};
-  if(l.stage===3||(l.stage===4&&!(l.dials||[]).length&&!(l.doors||[]).length))return {k:'FIRST TOUCH · THEIR NUMBER, NOT YOUR NAME',t:'Open with the ammo line and ask for nothing',w:'The first ten seconds decide whether you’re a vendor or a colleague showing them a leak. Lead with evidence, label the pain, offer the report. No pitch.',s:'“Hi '+esc(own)+', Giancarlo, Patheom, we’re local. Not selling anything today. '+dmLine+igLine+' Whoever answers first gets that consult. I put the full report together — want me to drop it by, or is there someone who runs your Instagram I should send it to?”',p:'VOSS · LABEL THE PAIN · SANDLER · PAIN FUNNEL',acts:[A('+1 DIAL',"logDial("+l.id+")"),A('REPORT MAILED',"markMailed("+l.id+")"),A('BOOK SETUP CALL',"bookMeeting("+l.id+")")]};
-  if(l.stage===4)return {k:'CONTACTED · REMOVE EVERY REASON TO WAIT',t:'Make the pilot impossible to refuse',w:'They know the leak. Now collapse risk and delay: free 30 days, no card, filmed week one, guarantee under 60 seconds. Then scarcity that is true, and a choice instead of a yes/no.',s:'“'+offer+' We’re taking three founding practices in '+esc(city)+' at $2,000 instead of $3,500'+(seats!=null?' — '+seats+' seat'+(seats===1?'':'s')+' left':'')+'. Setup call is 15 minutes. Tomorrow at 10 or Thursday at 2?”',p:'HORMOZI · GRAND SLAM OFFER (RISK REVERSAL + REAL SCARCITY) · ALTERNATIVE CLOSE',acts:[A('BOOK SETUP CALL',"bookMeeting("+l.id+")"),A('+1 DIAL',"logDial("+l.id+")")]};
+  if(l.stage===3||(l.stage===4&&!(l.dials||[]).length&&!(l.doors||[]).length))return {k:'FIRST TOUCH · THEIR NUMBER, NOT YOUR NAME',t:'Open with the ammo line and ask for nothing',w:'The first ten seconds decide whether you’re a vendor or a colleague showing them a leak. Lead with evidence, label the pain, offer the report. No pitch.',s:'“Hi '+esc(own)+', '+esc(me||'Giancarlo')+', Patheom, we’re local. Not selling anything today. '+dmLine+igLine+' Whoever answers first gets that consult. I put the full report together — want me to drop it by, or is there someone who runs your Instagram I should send it to?”',p:'VOSS · LABEL THE PAIN · SANDLER · PAIN FUNNEL',acts:[A('+1 DIAL',"logDial("+l.id+")"),A('REPORT MAILED',"markMailed("+l.id+")"),A('BOOK SETUP CALL',"bookMeeting("+l.id+")")]};
+  if(l.stage===4)return {k:'CONTACTED · REMOVE EVERY REASON TO WAIT',t:'Make the pilot impossible to refuse',w:'They know the leak. Now collapse risk and delay: free 30 days, no card, no contract, filmed week one, every message answered under 60 seconds or the month is free. Then scarcity that is true, and a choice instead of a yes/no.',s:'“'+offer+' We’re taking three founding practices in '+esc(marketName(l))+' at $2,000 instead of $3,500, for a case study and 90 seconds of the doctor on camera'+(seats!=null?' — '+seats+' seat'+(seats===1?'':'s')+' left':'')+'. Setup call is 15 minutes with whoever runs your Instagram. Tomorrow at 10 or Thursday at 2?”',p:'HORMOZI · GRAND SLAM OFFER (RISK REVERSAL + REAL SCARCITY) · ALTERNATIVE CLOSE',acts:[A('BOOK SETUP CALL',"bookMeeting("+l.id+")"),A('+1 DIAL',"logDial("+l.id+")")]};
   if(l.stage===5){
     if((l.noShows||0)>0&&!l.meetingDate)return {k:'NO-SHOW · DON’T CHASE, RE-ANCHOR',t:'Hold the spot, offer two times',w:'Chasing lowers your status. Assume good faith, remove friction, close on a choice.',s:'“No stress — I held your spot. Two options: Tue 2pm or Thu 11am. Which is easier?”',p:'BELFORT · CERTAINTY IN TONE · ALTERNATIVE CLOSE',acts:[A('REBOOK',"bookMeeting("+l.id+")")]};
-    return {k:'MEETING SET · CERTAINTY × 3',t:'Prep: report printed, a filming date picked',w:'A close needs certainty in the product, in you, and in the company. Product = their printed report. You = the door-to-door story. Company = founding seats. Ask for a filming day, not a decision.',s:'Open: “Here’s your report.” Middle: “Here’s what the posts look like. Here’s what happens when someone DMs — text this number.” Close: “Filming is one hour whenever it’s dead. Which day next week?”',p:'BELFORT · 3 CERTAINTIES · SANDLER · UP-FRONT CONTRACT',acts:[A('START PILOT',"startPilot("+l.id+")"),A('NO-SHOW',"noShow("+l.id+")")]};
+    return {k:'MEETING SET · CERTAINTY × 3',t:'Prep: report printed, a filming date picked, three things to collect',w:'A close needs certainty in the product, in you, and in the company. Product = their printed report. You = the door-to-door story. Company = founding seats. Ask for a filming day, not a decision. Leave with the three things we need: whoever runs their Instagram on the setup call, their price list + ten most common questions, and one filming hour on the calendar.',s:'Open: “Here’s your report.” Middle: “Here’s what the posts look like. Here’s what happens when someone DMs — text this number.” Close: “Filming is one hour whenever it’s dead. Which day next week? And who runs your Instagram — can they join the 15-minute setup call?”',p:'BELFORT · 3 CERTAINTIES · SANDLER · UP-FRONT CONTRACT',acts:[A('START PILOT',"startPilot("+l.id+")"),A('NO-SHOW',"noShow("+l.id+")")]};
   }
   if(l.stage===9){const day=pilotDay(l),pc=proofCount(l);
-    if(day>=23)return {k:'PILOT DAY '+day+' · BOOK THE DECISION CALL',t:'Present the five numbers before day 30',w:'Never let day 30 arrive without a meeting on the calendar. Messages in, consults booked, show rate, reviews, what those consults were worth. Then the 6-month, setup waived inside 7 days.',s:'“Day 30 is '+(OFFER.pilotDays-day)+' days out. Let’s look at the numbers together Thursday — every message answered, consults booked, what they were worth. If it did nothing, we shut it off and you keep the Playbook. If it worked, setup is waived if you sign within the week.”',p:'HORMOZI · PROOF → ASK · A DEADLINE THAT IS REAL',acts:[A('SIGNED → WON',"winLead("+l.id+")"),A('SHUT OFF',"shutOffPilot("+l.id+")")]};
+    if(day>=23)return {k:'PILOT DAY '+day+' · BOOK THE DECISION CALL',t:'Present the five numbers before day 30',w:'Never let day 30 arrive without a meeting on the calendar. Messages in, consults booked, show rate, reviews, what those consults were worth. Then the ask: 6-month agreement at $3,500 (or the $2,000 founding rate), $1,500 setup waived if they sign inside 7 days.',s:'“Day 30 is '+(OFFER.pilotDays-day)+' days out. Let’s look at the numbers together Thursday — every message answered, consults booked, what they were worth. If it did nothing, we shut it off and you keep the Playbook. If it worked, it’s a 6-month agreement and the $1,500 setup is waived if you sign within the week.”',p:'HORMOZI · PROOF → ASK · A DEADLINE THAT IS REAL',acts:[A('SIGNED → WON',"winLead("+l.id+")"),A('SHUT OFF',"shutOffPilot("+l.id+")")]};
     return {k:'PILOT DAY '+day+' · OVER-DELIVER EARLY',t:'Week one is the whole pilot: film, post, answer',w:'Proof compounds. Filmed by day 7, three posts live, inbox answering in under a minute — checked off here so the whole team sees it. '+(PROOF.length-pc)+' proof item'+(PROOF.length-pc===1?'':'s')+' open.',s:'Day-7 text: “First three posts are live and the inbox has answered every message in under a minute so far. Day 30 we look at consults together.”',p:'CIALDINI · RECIPROCITY + COMMITMENT',acts:[A('PROOF CHECKLIST',"openLead("+l.id+")")]};
   }
   return {k:'NEXT',t:'Keep moving',w:'',s:'',p:'',acts:[]};
@@ -1330,7 +1331,7 @@ function profileHTML(l){
 function viewEmail(){
   const withE=leads.filter(l=>l.email).sort((a,b)=>heat(b)-heat(a));
   let html='<div class="pool">CONTACTS WITH EMAIL <b>'+withE.length+'</b> · MISSING <b class="bad">'+(leads.length-withE.length)+'</b> · OUTLOOK <b class="bad">NOT CONNECTED</b></div>';
-  html+='<div class="lock"><span class="px">SEQUENCES · LOCKED</span>Waiting on the offer copy. When it lands: mass batches auto-personalized from this CRM (their DM time, IG gap, review gap, seats left in their city), 3-touch cadence, replies logged back to each record.</div>';
+  html+='<div class="lock"><span class="px">SEQUENCES · NEXT BUILD</span>Offer copy is in. When you say go: mass batches auto-personalized from this CRM (their DM time, IG gap, review gap, seats left in their market), 3-touch cadence, replies logged back to each record.</div>';
   html+='<div class="lock" style="text-align:left"><span class="px">OUTLOOK BRIDGE · HOW IT WORKS TODAY</span>Sending from this page needs a Microsoft app registration (client ID) — not wired yet. Until then: <b style="color:var(--txt)">EXPORT EMAIL LIST</b>, hand the CSV to Claude with the batch prompt, and it drafts every personalized email in your Outlook for one-tap send.</div>';
   html+='<button class="btn gold" onclick="exportEmails()">⬇ EXPORT EMAIL LIST (CSV)</button>';
   if(!withE.length)html+='<div class="empty" style="margin-top:12px"><span class="px">NO EMAILS YET</span>Add them on the HUNT form or in any CRM profile.</div>';
@@ -1339,7 +1340,7 @@ function viewEmail(){
 }
 function exportEmails(){
   const A=leads.filter(l=>l.email).sort((a,b)=>heat(b)-heat(a));if(!A.length){toast('NO EMAILS YET');return;}
-  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const q=v=>{let t=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
   const rows=[['Name','Email','Owner','City','Territory','Stage','Heat','Rank','DM reply (raw)','Missed-call text','Web form (raw)','Reviews','Stars','IG silence (days)','Ammo line','Report mailed','Phone','Instagram','Address']];
   A.forEach(l=>{const a=l.audit||{};rows.push([l.name,l.email,l.owner,l.city,territoryOf(l),STAGES[l.stage].n,heat(l),rdRank(readiness(l))[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5days,l.ammo,l.mailedAt||'',l.phone,l.ig,l.address||'']);});
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
@@ -1388,17 +1389,32 @@ function generateRoutes(){
 }
 async function ensureRoutes(){if(!leadsLoaded)return;if(routes.week!==routeWeekKey()){generateRoutes();await saveRoutes();}}
 async function regenRoutes(){if(!confirm('REBUILD THIS WEEK\'S ROUTES FOR ALL FOUR?\n\nDoor outcomes already logged stay on each lead. Only the assignments change.'))return;generateRoutes();await saveRoutes();sfx.ready();toast('ROUTES REBUILT · NO DUPES');routeFocus=null;render();}
-async function geocodePending(){
+function cleanAddr(a){
+  a=(a||'').replace(/[\u200B-\u200D\uFEFF\u2063]/g,'\n');
+  const parts=a.split(/\n|;|\s\|\s/).map(s=>s.trim()).filter(Boolean);a=parts[0]||a;
+  a=a.replace(/\s+/g,' ').trim();const m=a.match(/^(.*?\b\d{5})(?:-\d{4})?\b/);if(m)a=m[1];
+  return a.trim();
+}
+function simpleAddr(a){return cleanAddr(a).replace(/,?\s*\b(suite|ste\.?|unit|bldg|building|floor|fl\.?)\s*[\w-]+/ig,'').replace(/,?\s*#\s*[\w-]+/g,'').replace(/\s+,/g,',').replace(/\s+/g,' ').trim();}
+async function geoLookup(q){
+  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q));const j=await r.json();if(j&&j[0])return {lat:+j[0].lat,lng:+j[0].lon};}catch(e){}
+  try{const r=await fetch('https://photon.komoot.io/api/?limit=1&q='+encodeURIComponent(q));const j=await r.json();const f=j&&j.features&&j.features[0];if(f&&f.geometry)return {lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]};}catch(e){}
+  return null;
+}
+function geoPendingList(force){return leads.filter(l=>l.address&&(force||(l.lat==null&&!(l.geoMiss&&Date.now()-l.geoMiss<86400000))));}
+async function geocodePending(force){
   if(geoBusy)return;
-  const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000));
+  const pend=geoPendingList(force).map(l=>l.id);
   if(!pend.length){toast('ALL ADDRESSES MAPPED');return;}
-  geoBusy=true;let n=0;toast('MAPPING '+pend.length+' ADDRESSES…');
-  for(const l of pend){
-    try{const q=l.address+(l.city&&!l.address.toLowerCase().includes(l.city.toLowerCase())?', '+l.city:'');
-      const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q));const j=await r.json();
-      if(j&&j[0]){l.lat=parseFloat(j[0].lat);l.lng=parseFloat(j[0].lon);n++;}
-    }catch(e){}
-    l.geoTried=Date.now();
+  geoBusy=true;let n=0,i=0;toast('MAPPING '+pend.length+' ADDRESSES…');
+  for(const id of pend){
+    i++;const l=leads.find(x=>x.id===id);if(!l||!l.address)continue;
+    const c=cleanAddr(l.address),cityQ=l.city&&!c.toLowerCase().includes(l.city.toLowerCase())?', '+l.city:'';
+    let hit=await geoLookup(c+cityQ);
+    if(!hit){await new Promise(r=>setTimeout(r,600));hit=await geoLookup(simpleAddr(l.address)+(l.city?', '+l.city:''));}
+    const cur=leads.find(x=>x.id===id)||l;
+    if(hit){cur.lat=hit.lat;cur.lng=hit.lng;delete cur.geoMiss;n++;}else cur.geoMiss=Date.now();
+    if(i%10===0){toast('MAPPING '+i+'/'+pend.length+' · '+n+' FOUND');await saveLeads();}
     await new Promise(r=>setTimeout(r,1100));
   }
   geoBusy=false;
@@ -1428,7 +1444,8 @@ async function setDoor(id,outcome){
 async function setDoorNote(id,v){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);d.note=v.trim();delete drafts['dn-'+id];await saveLeads();}
 async function setDoorDm(id){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);if(d.dm){if(!confirm('Clear the DM time?'))return;delete d.dm;}else{d.dm=Date.now();toast('DM LOGGED · SAY THE TIME AT THE DOOR');}await saveLeads();render();}
 function copyDm(){const msg='Hi! Do you have any openings this week for lip filler or Botox? And what\'s your pricing? Thank you!';if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(msg).then(()=>toast('COPIED · OPEN IG, PASTE, THEN TAP DM SENT'),()=>prompt('Copy:',msg));else prompt('Copy:',msg);}
-async function setRouteSetting(k){const v=prompt(k==='demo'?'Demo number (the AI line they text):':'Booking link (calendar URL):',routes.settings[k]||'');if(v===null)return;routes.settings[k]=v.trim();await saveRoutes();render();}
+async function setRouteSetting(k){const v=prompt(k==='demo'?'Demo number (the AI line they text):':'Booking link (calendar URL):',routes.settings[k]||'');if(v===null)return;let val=v.trim();if(k==='book'&&val&&!/^https?:\/\//i.test(val)){if(/^[\w.-]+\.[a-z]{2,}/i.test(val))val='https://'+val;else{toast('BOOKING LINK MUST START WITH https://');return;}}routes.settings[k]=val;await saveRoutes();render();}
+function safeUrl(u){u=(u||'').trim();return /^https?:\/\//i.test(u)?u:'';}
 async function setAngle(id){const l=leads.find(x=>x.id===id);if(!l)return;const v=prompt('Door angle for '+l.name+' — who decides, who guards the door, what you lead with:',l.angle||'');if(v===null)return;l.angle=v.trim();await saveLeads();render();}
 function poolDiag(t){
   const inT=leads.filter(l=>territoryOf(l)===t),ok=inT.filter(l=>qualifies(l).ok),assigned=new Set(Object.values(routes.assign||{}).flat());
@@ -1448,24 +1465,24 @@ function routeHero(l,stops,who){
   '<ul class="facts"><li><b>ASK FOR</b> '+esc(ask)+'</li><li><b>REVIEWS</b> '+(a.a4count?esc(a.a4count)+(a.a4stars?' · '+esc(a.a4stars)+'★':''):(l.gReviews?esc(l.gReviews)+' Google':'not counted'))+'</li><li><b>HOURS</b> '+(l.hours?esc(l.hours):'<span class="miss">not set — add in CRM</span>')+'</li><li><b>IG</b> '+(l.ig?esc(l.ig):'not set')+(dm!=null?' · DM took '+r1(dm)+'h':'')+(ig!=null?' · last post '+ig+'d ago':'')+'</li><li>'+dist+'</li></ul>'+
   '<div class="odds"><div><b style="color:'+heatMeta(heat(l))[1]+'">'+heat(l)+'%</b><span>MEETING ODDS</span></div><div><b>'+canPay(l)+'</b><span>CAN PAY</span></div><div><b style="font-size:8px;line-height:1.5">'+revBand(rv)+'</b><span>EST. REVENUE</span></div></div>'+
   '<div class="angle" onclick="setAngle('+l.id+')">'+(l.angle?esc(l.angle):'Tap to write the angle — who decides, who guards the door, what you lead with.')+'</div>'+
-  (nb?'<div class="nb">NEIGHBOR AMMO: '+esc(nb.name)+', '+nb.txt+', '+nb.n.toLocaleString()+' reviews. They answer.</div>':'')+
+  (nb?'<div class="nb">NEIGHBOR AMMO: '+esc(nb.name)+', '+nb.txt+', '+nb.n.toLocaleString()+' reviews.</div>':'')+
   heatBar(l,false)+
   '<div class="rt-row"><a class="cbtn go" href="'+nav+'" target="_blank" rel="noopener">GO</a>'+(l.phone?'<a class="cbtn" href="tel:'+digitsOf(l.phone)+'">CALL</a>':'<span class="cbtn off">CALL</span>')+(l.ig?'<a class="cbtn pink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">OPEN IG</a>':'<a class="cbtn pink" target="_blank" rel="noopener" href="https://www.instagram.com/explore/search/keyword/?q='+encodeURIComponent(l.name+' '+(l.city||''))+'">FIND IG</a>')+'</div>'+
   '<div class="rt-row"><span class="cbtn'+(d.dm?' go':'')+'" onclick="setDoorDm('+l.id+')">'+(d.dm?'DM’D '+timeStr(d.dm):'DM SENT')+'</span><span class="cbtn" onclick="copyDm()">COPY DM</span>'+(routes.settings.demo?'<a class="cbtn" href="sms:'+digitsOf(routes.settings.demo)+'">TEXT DEMO</a>':'<span class="cbtn off">TEXT DEMO</span>')+'</div>'+
-  '<div class="rt-row">'+(l.cell?'<a class="cbtn" href="sms:'+digitsOf(l.cell)+'?&body='+followTxt+'">TEXT OWNER</a>':'<span class="cbtn off">TEXT OWNER</span>')+(routes.settings.book?'<a class="cbtn" target="_blank" rel="noopener" href="'+esc(routes.settings.book)+'">BOOK</a>':'<span class="cbtn off">BOOK</span>')+'<span class="cbtn" onclick="crmId='+l.id+';crmView=\'profiles\';go(\'crm\')">CRM</span></div>'+
+  '<div class="rt-row">'+(l.cell?'<a class="cbtn" href="sms:'+digitsOf(l.cell)+'?&body='+followTxt+'">TEXT OWNER</a>':'<span class="cbtn off">TEXT OWNER</span>')+(safeUrl(routes.settings.book)?'<a class="cbtn" target="_blank" rel="noopener" href="'+esc(safeUrl(routes.settings.book))+'">BOOK</a>':'<span class="cbtn off">BOOK</span>')+'<span class="cbtn" onclick="crmId='+l.id+';crmView=\'profiles\';go(\'crm\')">CRM</span></div>'+
   '<details class="script"><summary>DOOR SCRIPT · THIS STOP</summary><div class="scr">'+
   '<p><b>DESK.</b> “Hey, how’s it going? I’m '+esc(you)+', we’re a local company. Is '+esc(ask)+' around?”</p>'+
   '<p><b>OWNER.</b> “Thanks. '+esc(you)+', Patheom, we’re local. Not selling anything today. Two things we found.'+(ig!=null?' Your last post was '+ig+' days ago.':'')+(d.dm?' And we DM’d you at '+timeStr(d.dm)+' as a patient asking about lip filler, still nothing.':(dm!=null?' We DM’d you as a patient about lip filler and it took '+r1(dm)+' hours to hear back.':' And we DM’d you as a patient asking about lip filler.'))+' The page and the inbox just aren’t covered.”</p>'+
   '<p>“Who’s doing your social right now, is that you?”</p>'+
-  '<p>“'+(nb?esc(nb.name)+' posts four times a week and has '+nb.n.toLocaleString()+' reviews.':'The big practice down the street posts four times a week.')+' You’re the better practice and nobody’s seeing it. When’s the last time anyone here had an hour to film?”</p>'+
+  '<p>“'+(nb?esc(nb.name)+', '+nb.txt+', has '+nb.n.toLocaleString()+' reviews.':'The practices winning your patients are posting every week.')+' You’re the better practice and nobody’s seeing it. When’s the last time anyone here had an hour to film?”</p>'+
   '<p>“One hour a month. We show up with the scripts, you talk to a phone, we leave. Twelve posts, edited and posted, three a week, in your voice. Every DM those posts bring in answered in under a minute, day or night, with your prices, booked to your calendar. A 15-minute setup call and one hour on camera. That’s the whole ask.”</p>'+
   '<p>“Here’s what the posts look like.” (three clips) “Here’s what happens when someone DMs. Text this number.” ('+esc(demo)+')</p>'+
-  '<p>“We’re picking three pilot practices in '+esc(l.city||'the area')+'. Thirty days, free, no card. We film you week one, posts go up, inbox gets answered, day 30 your numbers decide. If it did nothing we shut it off. Want to be one of the three?”</p>'+
-  '<p>“Setup call is 15 minutes. Filming’s an hour at your place whenever it’s dead. Tomorrow at 10 or Thursday at 2?”</p>'+
-  '<p><b>HOW MUCH.</b> “Nothing for 30 days. After that $3,500 a month, and you decide with your numbers in front of you. First three practices here get it at $2,000'+(seats<3?' — '+seats+' left':'')+'.”</p>'+
+  '<p>“We’re taking three founding practices in '+esc(marketName(l))+'. Thirty days, free, no card, no contract. We film you week one, posts go up, inbox gets answered in under a minute, day 30 your numbers decide. If it did nothing we shut it off and you keep the Playbook. Want to be one of the three?”</p>'+
+  '<p>“Setup call is 15 minutes with whoever runs your Instagram. Filming’s an hour at your place whenever it’s dead. Tomorrow at 10 or Thursday at 2?”</p>'+
+  '<p><b>HOW MUCH.</b> “Nothing for 30 days. After that $3,500 a month on a 6-month agreement — $1,500 setup, waived if you sign inside the week — and you decide with your numbers in front of you. Every message answered in under 60 seconds or that month is free. The first three practices in '+esc(marketName(l))+' get it at $2,000 for a case study and 90 seconds of the doctor on camera'+(seats<3?' — '+seats+' left':'')+'.”</p>'+
   '<p><b>HAVE SOMEONE.</b> “Great. What are they posting and what’s it booking? This is the part they’re not doing: the DMs at 9pm and the scripts.”</p>'+
   '<p><b>SEND INFO.</b> “Sure, best email? Is that you or someone else? Can I put 15 minutes on your calendar Thursday?”</p>'+
-  '<p><b>OWNER OUT.</b> “When is she usually here? And your name? Who’s running your Instagram right now? Best name to ask for Thursday?”</p>'+
+  '<p><b>OWNER OUT.</b> “When are they usually here? And your name? Who’s running your Instagram right now? Best name to ask for Thursday?”</p>'+
   '</div></details>'+
   '<div class="status">'+['pending','talked','booked','ret','no'].map(k=>'<button class="'+(cur===k?'on-'+k:'')+'" onclick="setDoor('+l.id+',\''+k+'\')">'+DOOR_LABEL[k]+'</button>').join('')+'</div>'+
   '<input id="dn-'+l.id+'" placeholder="Who you talked to, what they said, when to come back" value="'+esc(d.note||'')+'" onchange="setDoorNote('+l.id+',this.value)" style="margin-top:8px">'+
@@ -1481,7 +1498,7 @@ function viewRoute(){
   const done=dd.filter(d=>d.outcome!=='pending').length,talk=dd.filter(d=>['talked','booked','ret'].includes(d.outcome)).length,bk=dd.filter(d=>d.outcome==='booked').length,dms=dd.filter(d=>d.dm).length;
   const kpi=(v,t,lbl)=>'<div class="'+(t&&v>=t?'hit':'')+'"><b>'+v+'<i>/'+t+'</i></b><span>'+lbl+'</span></div>';
   html+='<div class="rt-kpi">'+kpi(done,stops.length,'DOORS')+kpi(talk,Math.max(1,Math.round(stops.length*.3)),'OWNER TALKS')+kpi(bk,1,'PILOTS BOOKED')+kpi(dms,stops.length,'DMS SENT')+'</div>';
-  html+='<div class="pool">WEEK OF <b>'+(routes.week||routeWeekKey())+'</b> · '+q.lbl+' · <b>'+q.n+'</b> DOORS/WK · NEXT BUILD FRI '+nextFridayStr().toUpperCase()+'</div>';
+  html+='<div class="pool">WEEK OF <b>'+esc(routes.week||routeWeekKey())+'</b> · '+q.lbl+' · <b>'+q.n+'</b> DOORS/WK · NEXT BUILD FRI '+esc(nextFridayStr().toUpperCase())+'</div>';
   if(!stops.length){
     html+='<div class="empty" style="margin-top:12px;text-align:left"><span class="px" style="text-align:center">NO ROUTE FOR '+who.toUpperCase()+' THIS WEEK</span><div class="pool" style="margin:0">'+poolDiag(q.t)+'</div></div>';
   }else{
@@ -1499,8 +1516,8 @@ function viewRoute(){
     html+='<div class="act-row" style="margin-top:14px">'+legs.map((lg,i)=>'<a class="btn gold" style="text-decoration:none;text-align:center;margin-top:0" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/'+lg.map(l=>encodeURIComponent(l.lat!=null?l.lat+','+l.lng:(l.address||l.name))).join('/')+'">GOOGLE MAPS · STOPS '+(i*10+1)+'–'+(i*10+lg.length)+'</a>').join('')+'</div>';
     html+='<div class="pool" style="margin-top:12px">'+poolDiag(q.t)+'</div>';
   }
-  const pend=leads.filter(l=>l.address&&l.lat==null&&!(l.geoTried&&Date.now()-l.geoTried<7*86400000)).length;
-  html+='<div class="act-row" style="margin-top:12px">'+(pend?'<button class="btn ghost" onclick="geocodePending()">'+(geoBusy?'MAPPING…':'MAP '+pend+' ADDRESSES')+'</button>':'')+'<button class="btn ghost" onclick="regenRoutes()">REBUILD ROUTES</button><button class="btn ghost" onclick="exportRoute()">EXPORT ROUTE</button><button class="btn ghost" onclick="setRouteSetting(\'demo\')">'+(routes.settings.demo?'DEMO: '+esc(routes.settings.demo):'SET DEMO NUMBER')+'</button><button class="btn ghost" onclick="setRouteSetting(\'book\')">'+(routes.settings.book?'BOOKING LINK ✓':'SET BOOKING LINK')+'</button></div>';
+  const pend=geoPendingList().length,unmapped=leads.filter(l=>l.address&&l.lat==null).length;
+  html+='<div class="act-row" style="margin-top:12px">'+(pend?'<button class="btn ghost" onclick="geocodePending()">'+(geoBusy?'MAPPING…':'MAP '+pend+' ADDRESSES')+'</button>':(unmapped?'<button class="btn ghost" onclick="geocodePending(true)">RE-TRY '+unmapped+' UNMAPPED</button>':''))+'<button class="btn ghost" onclick="regenRoutes()">REBUILD ROUTES</button><button class="btn ghost" onclick="exportRoute()">EXPORT ROUTE</button><button class="btn ghost" onclick="setRouteSetting(\'demo\')">'+(routes.settings.demo?'DEMO: '+esc(routes.settings.demo):'SET DEMO NUMBER')+'</button><button class="btn ghost" onclick="setRouteSetting(\'book\')">'+(routes.settings.book?'BOOKING LINK ✓':'SET BOOKING LINK')+'</button></div>';
   return html;
 }
 function exportRoute(){
@@ -1517,8 +1534,10 @@ function initRouteMap(){
   if(typeof L==='undefined'){el.insertAdjacentHTML('beforeend','<div style="position:absolute;inset:0;display:grid;place-items:center;font-family:\'Press Start 2P\';font-size:7px;color:var(--dim)">MAP NEEDS INTERNET · LIST STILL WORKS</div>');return;}
   const who=routeUser||(QUOTA[me]?me:'Giancarlo'),ids=(routes.assign&&routes.assign[who])||[],all=ids.map(id=>leads.find(l=>l.id===id)).filter(Boolean),stops=all.filter(l=>l.lat!=null);
   rtMap=L.map('rt-map',{zoomControl:false,attributionControl:true});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(rtMap);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:19,opacity:.7}).addTo(rtMap);
+  let fellBack=false;
+  const base=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Tiles © Esri'}).addTo(rtMap);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,opacity:.8}).addTo(rtMap);
+  base.on('tileerror',()=>{if(fellBack)return;fellBack=true;L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:'osm-dark',attribution:'© OpenStreetMap'}).addTo(rtMap);});
   if(!stops.length){rtMap.setView(QUOTA[who].t==='LA'?[33.8,-118.1]:[41.85,-87.9],9);return;}
   const f=all.find(l=>l.id===routeFocus);
   stops.forEach(l=>{const i=all.indexOf(l),d=doorThisWeek(l,who),k=d?d.outcome:'pending';const cls='num-pin'+(['talked','booked','ret'].includes(k)?' done':k==='no'?' no':'')+(f&&f.id===l.id?' focus':'');
