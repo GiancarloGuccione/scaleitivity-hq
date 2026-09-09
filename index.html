@@ -779,6 +779,7 @@ function viewShop(){
     '<div class="intel-row">'+
     'IG: '+(l.ig?'<a class="clink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">'+esc(l.ig)+'</a> — fire the night DM here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
     'PHONE: '+(l.phone?'<a class="clink" href="tel:'+esc((l.phone||'').replace(/[^+\d]/g,''))+'">'+esc(l.phone)+'</a> — lunch-rush call here':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
+    'WEB: '+(safeUrl(l.website)?'<a class="clink" target="_blank" rel="noopener" href="'+esc(safeUrl(l.website))+'">'+esc(l.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,''))+'</a> — fire the contact-form test here':'<span class="miss">no website on file</span>')+'<br>'+
     'ADDRESS: '+(l.address?'<a class="clink" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">'+esc(l.address)+'</a>':'<span class="miss">MISSING — ping the scout</span>')+'<br>'+
     'SOURCE: '+(l.source?'<b>'+esc(l.source)+'</b>':'<span class="miss">unknown</span>')+
     ' · SCOUTED BY <b>'+(P[l.addedBy]?P[l.addedBy].n+' ':'')+esc(l.addedBy)+'</b>'+(l.addedAt?' · '+esc(l.addedAt):'')+
@@ -1090,8 +1091,8 @@ function exportIntel(){
   const A=leads.filter(l=>auditCount(l)>0).sort((a,b)=>readiness(b)-readiness(a));
   if(!A.length){toast('DATABASE EMPTY');return;}
   const q=v=>{let t=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"';};
-  const rows=[['Name','Address','Mail-ready','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
-  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',(l.address&&l.ammo)?'YES':(l.address?'NO AMMO':'NO ADDRESS'),l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
+  const rows=[['Name','Address','Mail-ready','Website','City','Owner','Stage','Readiness','Rank','DM reply (raw)','Missed-call text back','Web form reply (raw)','Google reviews','Stars','Last IG post','IG silence (days)','Ammo line','Phone','Instagram','Source','Scouted by','Audited by','Audit date']];
+  A.forEach(l=>{const a=l.audit,s=readiness(l);rows.push([l.name,l.address||'',(l.address&&l.ammo)?'YES':(l.address?'NO AMMO':'NO ADDRESS'),l.website||'',l.city,l.owner,STAGES[l.stage].n,s,rdRank(s)[0],a.a1hrs,a.a2text,a.a3hrs,a.a4count,a.a4stars,a.a5date||'',a.a5days,l.ammo,l.phone,l.ig,l.source,l.addedBy,l.auditedBy,l.auditedAt]);});
   const csv=rows.map(r=>r.map(q).join(',')).join('\n');
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(()=>{sfx.ready();toast(A.length+' RECORDS COPIED — PASTE INTO SHEETS');},()=>prompt('Copy this CSV:',csv));
   else prompt('Copy this CSV:',csv);
@@ -1328,6 +1329,7 @@ function profileHTML(l){
     (l.email?'<a class="cbtn" href="mailto:'+esc(l.email)+'">EMAIL</a>':'<span class="cbtn off">EMAIL</span>')+
     (l.ig?'<a class="cbtn pink" target="_blank" rel="noopener" href="'+esc(igUrl(l.ig))+'">INSTAGRAM</a>':'<span class="cbtn off">INSTAGRAM</span>')+
     (l.address?'<a class="cbtn" target="_blank" rel="noopener" href="https://maps.google.com/?q='+encodeURIComponent(l.address)+'">MAP</a>':'<span class="cbtn off">MAP</span>')+
+    (safeUrl(l.website)?'<a class="cbtn" target="_blank" rel="noopener" href="'+esc(safeUrl(l.website))+'">WEBSITE</a>':'<span class="cbtn off">WEBSITE</span>')+
     '<span class="cbtn" onclick="shopId='+l.id+';go(\'shop\')">AUDIT</span></div>';
   html+='<label>RECORD · EVERY EDIT SAVES ON BLUR</label><div class="kv">'+
     '<div class="f"><label>STAGE</label><select onchange="setField('+l.id+',\'stage\',this.value)">'+so+'</select></div>'+
@@ -1336,6 +1338,7 @@ function profileHTML(l){
     pf(l,'cell','OWNER CELL (TEXT)','949 555 0199','tel')+
     pf(l,'email','EMAIL','hello@glow.com','email')+
     pf(l,'ig','INSTAGRAM','@glowaesthetics')+
+    pf(l,'website','WEBSITE','https://glowaesthetics.com')+
     pf(l,'address','BUSINESS ADDRESS','1200 Newport Center Dr, Suite 150, Newport Beach, CA 92660',null,true)+
     pf(l,'hours','HOURS / DARK DAYS','Tue–Sat 10–6, closed Sun–Mon')+
     pf(l,'source','SOURCE','IG hashtag, drove past, referral')+
@@ -1416,8 +1419,8 @@ function generateRoutes(){
   Object.keys(assign).forEach(w=>assign[w]=orderRoute(assign[w]));
   routes.week=routeWeekKey();routes.gen=Date.now();routes.genBy=me||'auto';routes.assign=assign;
 }
-async function ensureRoutes(){if(!leadsLoaded||!routesLoaded)return;if(routes.week!==routeWeekKey()){generateRoutes();await saveRoutes();}}
-async function regenRoutes(){if(!confirm('REBUILD THIS WEEK\'S ROUTES FOR ALL FOUR?\n\nDoor outcomes already logged stay on each lead. Only the assignments change.'))return;generateRoutes();await saveRoutes();sfx.ready();toast('ROUTES REBUILT · NO DUPES');routeFocus=null;render();}
+async function ensureRoutes(){if(!leadsLoaded||!routesLoaded)return;if(routes.week!==routeWeekKey()){if(safeKey()&&(farmNeed('CHI')>0||farmNeed('LA')>0))await farmLeads(false);generateRoutes();await saveRoutes();}}
+async function regenRoutes(){if(!confirm('REBUILD THIS WEEK\'S ROUTES FOR ALL FOUR?\n\nFarms new practices first if any pool is short. Door outcomes already logged stay on each lead.'))return;if(safeKey()&&(farmNeed('CHI')>0||farmNeed('LA')>0))await farmLeads(false);generateRoutes();await saveRoutes();sfx.ready();toast('ROUTES REBUILT · NO DUPES');routeFocus=null;render();}
 function cleanAddr(a){
   a=(a||'').replace(/[\u200B-\u200D\uFEFF\u2063]/g,'\n');
   const parts=a.split(/\n|;|\s\|\s/).map(s=>s.trim()).filter(Boolean);a=parts[0]||a;
@@ -1473,7 +1476,7 @@ async function setDoor(id,outcome){
 async function setDoorNote(id,v){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);d.note=v.trim();delete drafts['dn-'+id];await saveLeads();}
 async function setDoorDm(id){const l=leads.find(x=>x.id===id);if(!l)return;const d=doorEntry(l);if(d.dm){if(!confirm('Clear the DM time?'))return;delete d.dm;}else{d.dm=Date.now();toast('DM LOGGED · SAY THE TIME AT THE DOOR');}await saveLeads();render();}
 function copyDm(){const msg='Hi! Do you have any openings this week for lip filler or Botox? And what\'s your pricing? Thank you!';if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(msg).then(()=>toast('COPIED · OPEN IG, PASTE, THEN TAP DM SENT'),()=>prompt('Copy:',msg));else prompt('Copy:',msg);}
-async function setRouteSetting(k){const v=prompt(k==='demo'?'Demo number (the AI line they text):':'Booking link (calendar URL):',routes.settings[k]||'');if(v===null)return;let val=v.trim();if(k==='book'&&val&&!/^https?:\/\//i.test(val)){if(/^[\w.-]+\.[a-z]{2,}/i.test(val))val='https://'+val;else{toast('BOOKING LINK MUST START WITH https://');return;}}routes.settings[k]=val;await saveRoutes();render();}
+async function setRouteSetting(k){const label=k==='demo'?'Demo number (the AI line they text):':k==='gkey'?'Google Places API key (restricted to this site):':'Booking link (calendar URL):';const v=prompt(label,k==='gkey'?'':(routes.settings[k]||''));if(v===null)return;let val=v.trim();if(k==='book'&&val&&!/^https?:\/\//i.test(val)){if(/^[\w.-]+\.[a-z]{2,}/i.test(val))val='https://'+val;else{toast('BOOKING LINK MUST START WITH https://');return;}}if(k==='gkey'&&val&&!/^AIza[0-9A-Za-z_-]{20,}$/.test(val)){toast('THAT DOES NOT LOOK LIKE A GOOGLE API KEY (STARTS WITH AIza)');return;}routes.settings[k]=val;await saveRoutes();render();if(k==='gkey'&&val)farmAndBuild(true);}
 function safeUrl(u){u=(u||'').trim();return /^https?:\/\//i.test(u)?u:'';}
 async function setAngle(id){const l=leads.find(x=>x.id===id);if(!l)return;const v=prompt('Door angle for '+l.name+' — who decides, who guards the door, what you lead with:',l.angle||'');if(v===null)return;l.angle=v.trim();await saveLeads();render();}
 function poolDiag(t){
@@ -1491,7 +1494,7 @@ function routeHero(l,stops,who){
   const followTxt=encodeURIComponent('Hey, it\'s '+you+' from Patheom, great meeting you today. Here\'s the number if you want to see it book you: '+demo+'. I\'ll swing back Thursday.');
   return '<div class="rt-hero"><div class="kick">'+(cur!=='pending'?'LOGGED · '+DOOR_LABEL[cur]:'UP NEXT')+' · STOP '+(idx+1)+' OF '+stops.length+(sl?' · ARRIVE '+sl:'')+'</div>'+
   '<div class="name"><div class="big-n">'+(idx+1)+'</div><div class="t">'+esc(l.name)+'<small>'+esc(l.address||'')+(l.city&&!(l.address||'').toLowerCase().includes(l.city.toLowerCase())?', '+esc(l.city):'')+'</small></div></div>'+
-  '<ul class="facts"><li><b>ASK FOR</b> '+esc(ask)+'</li><li><b>REVIEWS</b> '+(a.a4count?esc(a.a4count)+(a.a4stars?' · '+esc(a.a4stars)+'★':''):(l.gReviews?esc(l.gReviews)+' Google':'not counted'))+'</li><li><b>HOURS</b> '+(l.hours?esc(l.hours):'<span class="miss">not set — add in CRM</span>')+'</li><li><b>IG</b> '+(l.ig?esc(l.ig):'not set')+(dm!=null?' · DM took '+r1(dm)+'h':'')+(ig!=null?' · last post '+ig+'d ago':'')+'</li><li>'+dist+'</li></ul>'+
+  '<ul class="facts"><li><b>ASK FOR</b> '+esc(ask)+'</li><li><b>REVIEWS</b> '+(a.a4count?esc(a.a4count)+(a.a4stars?' · '+esc(a.a4stars)+'★':''):(l.gReviews?esc(l.gReviews)+' Google'+(l.gRating?' · '+esc(l.gRating)+'★':''):'not counted'))+'</li>'+(safeUrl(l.website)?'<li><b>WEB</b> <a class="clink" target="_blank" rel="noopener" href="'+esc(safeUrl(l.website))+'">'+esc(l.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,''))+'</a></li>':'')+'<li><b>HOURS</b> '+(l.hours?esc(l.hours):'<span class="miss">not set — add in CRM</span>')+'</li><li><b>IG</b> '+(l.ig?esc(l.ig):'not set')+(dm!=null?' · DM took '+r1(dm)+'h':'')+(ig!=null?' · last post '+ig+'d ago':'')+'</li><li>'+dist+'</li></ul>'+
   '<div class="odds"><div><b style="color:'+heatMeta(heat(l))[1]+'">'+heat(l)+'%</b><span>MEETING ODDS</span></div><div><b>'+canPay(l)+'</b><span>CAN PAY</span></div><div><b style="font-size:8px;line-height:1.5">'+revBand(rv)+'</b><span>EST. REVENUE</span></div></div>'+
   '<div class="angle" onclick="setAngle('+l.id+')">'+(l.angle?esc(l.angle):'Tap to write the angle — who decides, who guards the door, what you lead with.')+'</div>'+
   (nb?'<div class="nb">NEIGHBOR AMMO: '+esc(nb.name)+', '+nb.txt+', '+nb.n.toLocaleString()+' reviews.</div>':'')+
@@ -1527,7 +1530,8 @@ function viewRoute(){
   const done=dd.filter(d=>d.outcome!=='pending').length,talk=dd.filter(d=>['talked','booked','ret'].includes(d.outcome)).length,bk=dd.filter(d=>d.outcome==='booked').length,dms=dd.filter(d=>d.dm).length;
   const kpi=(v,t,lbl)=>'<div class="'+(t&&v>=t?'hit':'')+'"><b>'+v+'<i>/'+t+'</i></b><span>'+lbl+'</span></div>';
   html+='<div class="rt-kpi">'+kpi(done,stops.length,'DOORS')+kpi(talk,Math.max(1,Math.round(stops.length*.3)),'OWNER TALKS')+kpi(bk,1,'PILOTS BOOKED')+kpi(dms,stops.length,'DMS SENT')+'</div>';
-  html+='<div class="pool">WEEK OF <b>'+esc(routes.week||routeWeekKey())+'</b> · '+q.lbl+' · <b>'+q.n+'</b> DOORS/WK · NEXT BUILD FRI '+esc(nextFridayStr().toUpperCase())+'</div>';
+  html+='<div class="pool">WEEK OF <b>'+esc(routes.week||routeWeekKey())+'</b> · '+q.lbl+' · <b>'+q.n+'</b> DOORS/WK · 72 TOTAL · NEXT BUILD FRI '+esc(nextFridayStr().toUpperCase())+'</div>';
+  html+=farmPanel();
   if(!stops.length){
     html+='<div class="empty" style="margin-top:12px;text-align:left"><span class="px" style="text-align:center">NO ROUTE FOR '+who.toUpperCase()+' THIS WEEK</span><div class="pool" style="margin:0">'+poolDiag(q.t)+'</div></div>';
   }else{
@@ -1579,6 +1583,101 @@ function initRouteMap(){
   rtMapWho=who;rtMapFocus=routeFocus;
   if(keep&&keep.who===who&&keep.focus===routeFocus)rtMap.setView(keep.center,keep.zoom);
   else if(f&&f.lat!=null)rtMap.setView([f.lat,f.lng],12);else rtMap.fitBounds(stops.map(l=>[l.lat,l.lng]),{padding:[30,30]});
+}
+
+/* ============ FARM: auto-discover + auto-qualify practices (Google Places API · New) ============ */
+const FARM={
+  QUERIES:['med spa','medical spa','aesthetics clinic','botox and filler','dermatologist','plastic surgeon','laser skin clinic'],
+  CHI_CITY:['Gold Coast, Chicago, IL','River North, Chicago, IL','Lincoln Park, Chicago, IL','Lakeview, Chicago, IL','West Loop, Chicago, IL','Wicker Park, Chicago, IL','Bucktown, Chicago, IL','Streeterville, Chicago, IL','Old Town, Chicago, IL','South Loop, Chicago, IL','Logan Square, Chicago, IL','Lincoln Square, Chicago, IL','Hyde Park, Chicago, IL','Andersonville, Chicago, IL','Roscoe Village, Chicago, IL'],
+  CHI_BURBS:['Naperville, IL','Schaumburg, IL','Oak Brook, IL','Hinsdale, IL','Evanston, IL','Wilmette, IL','Northbrook, IL','Glenview, IL','Arlington Heights, IL','Downers Grove, IL','Orland Park, IL','Elmhurst, IL','Lombard, IL','Wheaton, IL','Barrington, IL','Highland Park, IL','Skokie, IL','Park Ridge, IL','Des Plaines, IL','Oak Park, IL','Burr Ridge, IL','Western Springs, IL','La Grange, IL','Buffalo Grove, IL','Deerfield, IL','Libertyville, IL','Vernon Hills, IL','Geneva, IL','St. Charles, IL','Bolingbrook, IL','Plainfield, IL','Joliet, IL','Tinley Park, IL','Frankfort, IL','Mokena, IL','New Lenox, IL','Homer Glen, IL','Lemont, IL','Willowbrook, IL','Westmont, IL','Clarendon Hills, IL','Glen Ellyn, IL','Winnetka, IL','Lincolnshire, IL','Long Grove, IL','Inverness, IL','Palatine, IL','Hoffman Estates, IL','Elk Grove Village, IL','Mount Prospect, IL','Wheeling, IL','Niles, IL','Morton Grove, IL','Lisle, IL','Warrenville, IL','Batavia, IL','Elgin, IL','Crystal Lake, IL','Algonquin, IL','Lake Zurich, IL','Mundelein, IL','Gurnee, IL','Glencoe, IL','Lake Forest, IL','Glendale Heights, IL','Oak Lawn, IL'],
+  LA:['Newport Beach, CA','Irvine, CA','Costa Mesa, CA','Torrance, CA','Anaheim, CA','Tustin, CA','Santa Ana, CA','Huntington Beach, CA','Laguna Beach, CA','Laguna Niguel, CA','Mission Viejo, CA','Long Beach, CA','Pasadena, CA','Burbank, CA','Glendale, CA','Sherman Oaks, CA','Studio City, CA','Encino, CA','Woodland Hills, CA','Calabasas, CA','Beverly Hills, CA','Santa Monica, CA','West Hollywood, CA','Culver City, CA','Manhattan Beach, CA','Redondo Beach, CA','Fullerton, CA','Brea, CA','Yorba Linda, CA','Aliso Viejo, CA','Dana Point, CA','San Clemente, CA','Rancho Santa Margarita, CA','Fountain Valley, CA','Garden Grove, CA','Seal Beach, CA','La Habra, CA','Corona del Mar, CA','Tarzana, CA','Toluca Lake, CA','Marina del Rey, CA','Thousand Oaks, CA','Westlake Village, CA','Brentwood, Los Angeles, CA','Pacific Palisades, CA','El Segundo, CA'],
+  MIN_REVIEWS:100,PER_RUN:30,BUFFER:1.3
+};
+let farmBusy=false,farmIdSeq=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function safeKey(){return ((routes.settings&&routes.settings.gkey)||'').trim();}
+function farmAreas(t){return t==='CHI'?FARM.CHI_CITY.concat(FARM.CHI_BURBS):FARM.LA;}
+function farmNeed(t){
+  const quota=FOUNDERS.filter(f=>QUOTA[f].t===t).reduce((s,f)=>s+QUOTA[f].n,0);
+  const pool=leads.filter(l=>territoryOf(l)===t&&qualifies(l).ok).length;
+  return Math.max(0,Math.round(quota*FARM.BUFFER)-pool);
+}
+function isPractice(p){
+  const name=((p.displayName&&p.displayName.text)||'').toLowerCase(),types=(p.types||[]).concat([p.primaryType||'']);
+  if(p.businessStatus&&p.businessStatus!=='OPERATIONAL')return false;
+  const nameOk=/med ?spa|medspa|aesthetic|esthetic|derm|skin|laser|cosmetic|plastic|botox|filler|wellness|\bmd\b|m\.d\.|medical|clinic|rejuv|glow|beauty|face|injec/.test(name);
+  const typeOk=types.some(t=>/spa|skin_care|beauty_salon|doctor|dermatolog|plastic_surgeon|medical|wellness|health|clinic|physician/.test(t));
+  const bad=types.some(t=>/hair_salon|nail_salon|massage|barber|tattoo|gym|dentist|veterin|pharmacy|hospital|eyelash|waxing/.test(t))&&!/med ?spa|medspa|aesthetic|laser|botox|skin|derm|injec/.test(name);
+  return (nameOk||typeOk)&&!bad;
+}
+function placeToLead(p){
+  const addr=(p.formattedAddress||'').replace(/,\s*(USA|United States)$/,'').trim();
+  const parts=addr.split(',').map(x=>x.trim()).filter(Boolean);
+  const city=parts.length>=3?parts[parts.length-2]:(parts[1]||'');
+  const wd=(p.regularOpeningHours&&p.regularOpeningHours.weekdayDescriptions)||[];
+  const closed=wd.filter(x=>/closed/i.test(x)).map(x=>x.split(':')[0].slice(0,3));
+  const hours=wd.length?(closed.length?'Closed '+closed.join(', '):'Open 7 days'):'';
+  let id=Date.now()+(++farmIdSeq);while(leads.some(x=>x.id===id))id++;
+  return {id,name:(p.displayName&&p.displayName.text)||'Unknown practice',city,owner:'',phone:p.nationalPhoneNumber||'',ig:'',address:addr,email:'',website:p.websiteUri||'',gReviews:p.userRatingCount||'',gRating:p.rating||'',hours,source:'FARM · Google Places',stage:1,addedBy:'FARM',addedAt:new Date().toISOString().slice(0,10),ts:Date.now(),audit:{a1hrs:'',a2text:'',a3hrs:'',a4count:'',a4stars:'',a5days:''},auditedBy:'',ammo:'',meetingDate:'',bookedBy:'',result:'',closedBy:'',notes:'',dials:[],nextTouch:'',auditedAt:'',lat:p.location?p.location.latitude:undefined,lng:p.location?p.location.longitude:undefined,placeId:p.id||'',log:[{t:Date.now(),by:'FARM',ev:'Auto-farmed from Google Places · '+(p.userRatingCount||0)+' reviews'+(p.rating?' · '+p.rating+'★':'')}]};
+}
+async function placesSearch(q,key){
+  const r=await fetch('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.websiteUri,places.primaryType,places.types,places.businessStatus,places.regularOpeningHours.weekdayDescriptions'},body:JSON.stringify({textQuery:q,pageSize:20,regionCode:'US',languageCode:'en'})});
+  if(!r.ok){let msg='';try{msg=((await r.json()).error||{}).message||'';}catch(e){}throw new Error('Places '+r.status+(msg?' · '+msg.slice(0,80):''));}
+  const j=await r.json();return j.places||[];
+}
+async function farmLeads(manual){
+  const key=safeKey();
+  if(!key){if(manual)toast('PASTE THE GOOGLE PLACES KEY FIRST');return null;}
+  if(farmBusy){if(manual)toast('FARM ALREADY RUNNING');return null;}
+  farmBusy=true;if(tab==='route')render();
+  routes.farm=routes.farm||{cursor:{CHI:0,LA:0},q:{CHI:0,LA:0}};
+  let searches=0,added=0,err='';
+  try{
+    for(const t of ['CHI','LA']){
+      let deficit=farmNeed(t);const areas=farmAreas(t);let guard=0;
+      while(deficit>0&&searches<FARM.PER_RUN&&guard<areas.length*FARM.QUERIES.length){
+        guard++;
+        const ai=(routes.farm.cursor[t]||0)%areas.length,qi=(routes.farm.q[t]||0)%FARM.QUERIES.length;
+        const res=await placesSearch(FARM.QUERIES[qi]+' in '+areas[ai],key);searches++;
+        routes.farm.q[t]=qi+1;if(routes.farm.q[t]>=FARM.QUERIES.length){routes.farm.q[t]=0;routes.farm.cursor[t]=ai+1;}
+        for(const p of res){
+          if(!isPractice(p))continue;
+          if((p.userRatingCount||0)<FARM.MIN_REVIEWS)continue;
+          if(p.id&&leads.some(x=>x.placeId===p.id))continue;
+          const lead=placeToLead(p);
+          if(!lead.address||territoryOf(lead)!==t)continue;
+          if(findDupe(lead))continue;
+          leads.push(lead);added++;deficit--;
+        }
+        toast('FARMING '+t+' · +'+added+' QUALIFIED · '+searches+' SEARCHES');
+        await sleep(200);
+      }
+    }
+  }catch(e){err=(e&&e.message)||'error';}
+  routes.farm.last={t:Date.now(),added,searches,err};
+  farmBusy=false;
+  if(added)await saveLeads();
+  await saveRoutes();
+  if(err)toast('FARM STOPPED · '+err.slice(0,70));else toast('FARM DONE · +'+added+' QUALIFIED PRACTICES');
+  return {added,searches,err};
+}
+async function farmAndBuild(manual){const r=await farmLeads(manual);if(r===null&&!safeKey())return;generateRoutes();await saveRoutes();routeFocus=null;render();}
+function farmPanel(){
+  const key=safeKey(),last=routes.farm&&routes.farm.last;
+  let h='<label>FARM · AUTO-DISCOVER + AUTO-QUALIFY · '+FARM.MIN_REVIEWS+'+ GOOGLE REVIEWS ≈ $1M/YR</label>';
+  if(!key){
+    h+='<div class="lock" style="text-align:left"><span class="px">GOOGLE PLACES KEY NEEDED · 5 MINUTES · ONE TIME</span>'+
+    '1. console.cloud.google.com → New project (“Patheom HQ”).<br>'+
+    '2. APIs &amp; Services → Library → enable <b style="color:var(--txt)">Places API (New)</b>.<br>'+
+    '3. Billing → add a card. Our volume (~30 searches a week) stays inside Google’s free tier; set a $10 budget alert anyway.<br>'+
+    '4. Credentials → Create API key → Application restrictions: <b style="color:var(--txt)">Websites</b> → add <b style="color:var(--txt)">https://giancarloguccione.github.io/*</b> → API restrictions: Places API (New) only.<br>'+
+    '5. Paste it below. The farm then fills every route to quota — 72 doors a week — and re-farms every Friday.</div>'+
+    '<button class="btn gold" onclick="setRouteSetting(\'gkey\')">PASTE GOOGLE PLACES KEY</button>';
+  }else{
+    h+='<div class="pool">KEY <b>•••'+esc(key.slice(-4))+'</b> · CHI POOL NEEDS <b>'+farmNeed('CHI')+'</b> MORE · LA POOL NEEDS <b>'+farmNeed('LA')+'</b> MORE'+(last?'<br>LAST RUN '+esc(fmtTs(last.t))+' · +'+last.added+' PRACTICES · '+last.searches+' SEARCHES'+(last.err?' · <span class="bad">'+esc(last.err)+'</span>':''):'<br>NO RUN YET — TAP FARM NOW')+'</div>'+
+    '<div class="act-row"><button class="btn gold" '+(farmBusy?'disabled':'')+' onclick="farmAndBuild(true)">'+(farmBusy?'FARMING…':'FARM NOW + REBUILD ROUTES')+'</button><button class="btn ghost" onclick="setRouteSetting(\'gkey\')">CHANGE KEY</button></div>';
+  }
+  return h;
 }
 
 /* ============ BREAK ROOM: DOUBLES PONG (Supabase Realtime, live 2v2) ============ */
